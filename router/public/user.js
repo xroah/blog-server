@@ -22,10 +22,10 @@ function clearErrorTimes(userName) {
     query.updateOne("users", {
         userName
     }, {
-        $unset: {
-            errorTimes: 0
-        }
-    });
+            $unset: {
+                errorTimes: 0
+            }
+        });
 }
 
 router.post("/login", (req, res) => {
@@ -223,10 +223,18 @@ router.post("/register", (req, res) => {
             });
         }
     }).catch(err => {
-
         console.log(err);
     });
 
 });
+
+router.get("/loginStatus", (req, res) => {
+    res.json({
+        errCode: 0,
+        data: {
+            loggedIn: req.session.user
+        }
+    });
+})
 
 module.exports = router;

@@ -27,7 +27,7 @@ module.exports = {
     },
     updateOne(collection, filter, update, options) {
         let collec = DATABASE.collection(collection);
-        return collec.update(filter, update, options);
+        return collec.updateOne(filter, update, options);
     },
     deleteOne(collection, filter, options) {
         let collec = DATABASE.collection(collection);
