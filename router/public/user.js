@@ -41,7 +41,7 @@ router.post("/login", (req, res) => {
         return;
     }
     query.findOne("users", {
-        userName,
+        $or: [{ userName }, { email: userName }],
         password
     }, {
             projection: {
@@ -215,7 +215,7 @@ router.post("/register", (req, res) => {
     }).then(ret => {
         if (ret) {
             delete req.session.idCode;
-            req.session.userName = userName;
+            req.session.user = userName;
             req.session.isAdmin = false;
             res.json({
                 errCode: 0,
