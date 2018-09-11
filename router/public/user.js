@@ -53,6 +53,7 @@ router.post("/login", (req, res) => {
                 delete req.session.idCode;
                 req.session.user = userName;
                 req.session.isAdmin = +ret.permission === 1;
+                req.session.userId = ret._id;
                 res.json({
                     errCode: 0
                 });
@@ -217,6 +218,7 @@ router.post("/register", (req, res) => {
             delete req.session.idCode;
             req.session.user = userName;
             req.session.isAdmin = false;
+            req.session.userId = ret.insertedId;
             res.json({
                 errCode: 0,
                 errMsg: "注册成功"
