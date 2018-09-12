@@ -9,9 +9,8 @@ module.exports = function connect(callback) {
         if (err) {
             throw err;
         }
-        let db = client.db("blog");
         if (typeof callback === "function") {
-            callback(db, client);
+            callback(client);
         }
     });
 }

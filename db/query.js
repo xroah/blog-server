@@ -1,4 +1,5 @@
-const DATABASE = global.dbConn;
+const MONGO_CLIENT = global.mongoClient;
+const DATABASE = MONGO_CLIENT.db("blog");
 
 module.exports = {
     aggregate(collection, pipeline, option, callback) {

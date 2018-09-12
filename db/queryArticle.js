@@ -51,6 +51,11 @@ module.exports = {
                 $match
             },
             {
+                $sort: {
+                    createTime: -1,
+                }
+            },
+            {
                 $skip: (page - 1) * 10
             }, {
                 $lookup
@@ -59,11 +64,6 @@ module.exports = {
             },
             {
                 $limit: 10
-            },
-            {
-                $sort: {
-                    createTime: -1,
-                }
             },
             {
                 $project
