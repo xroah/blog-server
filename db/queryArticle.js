@@ -3,9 +3,10 @@ const ObjectID = require("mongodb").ObjectID;
 
 let $lookup = {
     from: "classify",
-    let: { s_id: "$secondLevelId" },
-    pipeline: [
-        {
+    let: {
+        s_id: "$secondLevelId"
+    },
+    pipeline: [{
             $match: {
                 $expr: {
                     $eq: ["$_id", "$$s_id"]
@@ -17,7 +18,8 @@ let $lookup = {
                 _id: 0,
                 name: 1
             }
-        }],
+        }
+    ],
     as: "classification"
 };
 
@@ -46,50 +48,52 @@ module.exports = {
             $match.secret = "0";
         }
         let articles = query.aggregate("articles", [{
-            $match
-        }, {
-            $lookup
-        }, {
-            $unwind: "$classification"
-        },
-        {
-            $limit: 10
-        },
-        {
-            $sort: {
-                createTime: -1,
-            }
-        },
-        {
-            $skip: (page - 1) * 10
-        },
-        {
-            $project
+                $match
+            },
+            {
+                $skip: (page - 1) * 10
+            }, {
+                $lookup
+            }, {
+                $unwind: "$classification"
+            },
+            {
+                $limit: 10
+            },
+            {
+                $sort: {
+                    createTime: -1,
+                }
+            },
+            {
+                $project
 
-        }]).toArray();
+            }
+        ]).toArray();
         return Promise.all([count, articles]);
     },
     async getById(id) {
         let _id = new ObjectID(id);
         let ret = await query.aggregate("articles", [{
-            $match: {
-                _id
-            }
-        }, {
-            $lookup
-        }, {
-            $unwind: "$classification"
-        },
-        {
-            $addFields: {
-                clsName: "$classification.name"
-            }
+                $match: {
+                    _id
+                }
+            }, {
+                $lookup
+            }, {
+                $unwind: "$classification"
+            },
+            {
+                $addFields: {
+                    clsName: "$classification.name"
+                }
 
-        }, {
-            $project: {
-                classification: 0
+            }, {
+                $project: {
+                    classification: 0
+                }
             }
-        }]).toArray();
+        ]).toArray();
         return ret[0];
     }
 }
