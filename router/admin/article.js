@@ -40,7 +40,7 @@ router.route("/classify").get((req, res) => {
         pid
     }).then(ret => {
         if (ret) {
-            res.send({
+            res.json({
                 errCode: 1,
                 errMsg: "分类已存在"
             });
@@ -54,7 +54,7 @@ router.route("/classify").get((req, res) => {
             createTime: new Date()
         }
         query.insertOne(collec, doc).then(ret => {
-            res.send({
+            res.json({
                 errCode: 0,
                 data: ret.ops[0]
             });
@@ -85,7 +85,7 @@ router.route("/classify").get((req, res) => {
         pid: id
     }).then(ret => {
         if (ret) {
-            res.send({
+            res.json({
                 errCode: 1,
                 errMsg: "该分类下有子分类，不能删除!"
             });
@@ -109,7 +109,7 @@ router.route("/classify").get((req, res) => {
             query.deleteOne("classify", {
                 _id: ObjectID(req.body.id)
             }).then(ret => {
-                res.send({
+                res.json({
                     errCode: 0
                 });
             });
