@@ -82,7 +82,7 @@ app.use("/api", router);
 
 //404
 app.use((req, res) => {
-    res.status(404);
+    // res.status(404);
     res.sendFile("static/error/404.html", {
         root: __dirname
     });
