@@ -108,7 +108,7 @@ router.route("/classify").get((req, res) => {
         if (!ret) {
             query.deleteOne("classify", {
                 _id: ObjectID(req.body.id)
-            }).then(ret => {
+            }).then(() => {
                 res.json({
                     errCode: 0
                 });
@@ -137,7 +137,7 @@ router.route("/:page?/:keywords?").get((req, res) => {
             }
         });
     });
-    return
+    return;
 }).post((req, res) => {
     let {
         body
