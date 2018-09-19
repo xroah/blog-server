@@ -21,6 +21,24 @@ router.get("/details/:id", (req, res) => {
     });
 });
 
+router.route("/comment/:articleId").get((req, res) => {
+    let articleId = new ObjectID(req.params.articleId);
+}).post((req, res) => {
+    let articleId = new ObjectID(req.params.articleId);
+    let { content, replyTo, userInfo } = req.body;
+    if (!req.session.userId && !userInfo) {
+        res.json({
+            errCode: 1,
+            errMsg: "请补全个人信息",
+            data: {
+                needInfo: true
+            }
+        });
+        return;
+    }
+});
+
+
 router.get("/:page?/:keywords?", (req, res) => {
     let {
         params
@@ -55,5 +73,4 @@ router.post("/updateViewedTimes", async (req, res) => {
         errCode: 0
     });
 });
-
 module.exports = router;
