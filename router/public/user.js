@@ -33,7 +33,8 @@ router.post("/login", (req, res) => {
     let userName = body.userName;
     let password = md5(body.password);
     let idCode = body.idCode;
-    if (req.session.idCode && idCode !== req.session.idCode) {
+    let needCode = body.needCode;
+    if (needCode && req.session.idCode && idCode !== req.session.idCode) {
         res.json({
             errCode: 1,
             errMsg: "验证码不正确"
