@@ -1,23 +1,44 @@
 {
-  "name": "vue-demo",
+  "name": "blog-server",
   "version": "1.0.0",
-  "description": "blog server",
-  "main": "src/start.js",
+  "description": "my blog backend",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --color --progress"
+    "tsc": "tsc --watch"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xroah/blog-server.git"
+  },
+  "keywords": [
+    "javascript",
+    "blog",
+    "express",
+    "node",
+    "typescript"
+  ],
   "author": "xroah",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xroah/blog-server/issues"
+  },
+  "homepage": "https://github.com/xroah/blog-server#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
-    "canvas": "^1.6.11",
-    "connect-history-api-fallback": "^1.5.0",
-    "connect-mongo": "^2.0.1",
-    "express": "^4.16.3",
+    "connect-mongo": "^2.0.3",
+    "express": "^4.16.4",
     "express-session": "^1.15.6",
-    "mongodb": "^3.1.1",
-    "multer": "^1.3.1"
+    "mongodb": "^3.1.13",
+    "multer": "^1.4.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/body-parser": "^1.17.0",
+    "@types/connect-mongo": "0.0.40",
+    "@types/express": "^4.16.1",
+    "@types/express-session": "^1.15.12",
+    "@types/mongodb": "^3.1.19",
+    "@types/multer": "^1.3.7",
+    "typescript": "^3.3.3"
+  }
 }
