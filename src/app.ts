@@ -1,12 +1,35 @@
 import express from "express";
+import bodyParser from "body-parser";
+import session from "express-session";
+import connectRedis from "connect-redis";
 import admin from "./admin";
+import apiRouter from "./routes/index";
 
 const app = express();
+const RedisStore = connectRedis(session);
 
-app.get("/", (req, res) => {
-    res.end("Hello world!");
-});
+app.use(session({
+    secret: "my_blog",
+    rolling: true,
+    resave: true,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        maxAge: 30 * 60 * 1000 
+    },
+    store: new RedisStore({
+        host: "localhost",
+        port: 6379
+    })
+}));
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
 
 app.use("/api/admin", admin);
+
+app.use("/api", apiRouter);
 
 export default app;

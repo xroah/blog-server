@@ -1,7 +1,13 @@
-import { MongoClient } from "mongodb";
+import {
+    MongoClient,
+    Db,
+    CollectionInsertManyOptions,
+    FindOneOptions
+} from "mongodb";
 import config from "../config";
+import qa, { Options } from "./queryArticle";
 
-let db;
+let db: Db;
 
 function connect(callback: Function) {
     MongoClient.connect(config.devDbURL, {
@@ -13,6 +19,34 @@ function connect(callback: Function) {
     });
 }
 
+function insert(c: string, data: Object | Array<Object>, options: CollectionInsertManyOptions) {
+    if (Array.isArray(data)) {
+        return db.collection(c).insertMany(data, options);
+    }
+    return db.collection(c).insertOne(data, options)
+}
+
+function find(c: string, query: Object, options?: FindOneOptions) {
+    return db.collection(c).find(query, options);
+}
+
+function findOne(c: string, query: Object, options: FindOneOptions) {
+    return db.collection(c).findOne(query, options);
+}
+
+function count(c: string) {
+    return db.collection(c).countDocuments();
+}
+
+function queryArticle(c: string, opts: Options) {
+  return qa(db, c, opts); 
+}
+
 export {
-    connect
+    connect,
+    insert,
+    find,
+    findOne,
+    count,
+    queryArticle
 }
