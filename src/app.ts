@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import admin from "./admin";
-import apiRouter from "./routes/index";
+import publicRouter from "./routes/public";
 
 const app = express();
 const RedisStore = connectRedis(session);
@@ -30,6 +30,6 @@ app.use(bodyParser.json());
 
 app.use("/api/admin", admin);
 
-app.use("/api", apiRouter);
+app.use("/api", publicRouter);
 
 export default app;

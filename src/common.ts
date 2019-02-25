@@ -1,14 +1,12 @@
-import { Router } from "express";
-import { response } from "../util";
-import { queryArticle } from "../db";
+import { Request, Response, NextFunction } from "express";
+import { queryArticle } from "./db";
+import { response } from "./util";
 
-const router = Router();
-
-router.route("/list/:id?").get(async (req, res) => {
+async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;
-    let secret = false;
+    let secret = !!query.secret;
     let id = req.params.id;
-    let {page, keywords} = query;
+    let { page, keywords } = query;
     let projection: Object = {
         secret: 0
     };
@@ -18,7 +16,7 @@ router.route("/list/:id?").get(async (req, res) => {
         };
     }
     let [list, total] = await queryArticle("article", {
-        page, 
+        page,
         keywords,
         secret,
         id,
@@ -34,6 +32,8 @@ router.route("/list/:id?").get(async (req, res) => {
         };
     }
     response(res, 0, data);
-});
+}
 
-export default router;
+export {
+    getArticles
+}

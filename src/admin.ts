@@ -1,9 +1,8 @@
 import express from "express";
+import apiRouter from "./routes/admin"
 
 const admin = express();
 
-admin.get("/", (req, res) => {
-    res.end("Admin page!");
-});
+admin.use(apiRouter);
 
 export default admin;
