@@ -13,7 +13,7 @@ export default function (db: Db, c: string, options: Options) {
     let collection: Collection = db.collection(c);
     let { page = 1, keywords, id, projection, secret  } = options;
     let $lookup: any = {
-        from: "classification",
+        from: "classifications",
         localField: "clsId",
         foreignField: "_id",
         as: "cls"

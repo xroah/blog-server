@@ -16,7 +16,7 @@ router.route("/list/:id?").get(getArticles)
         clsId,
         summary
      } = req.body;
-     await insert("article", {
+     await insert("articles", {
          title,
          content,
          secret,

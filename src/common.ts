@@ -15,7 +15,7 @@ async function getArticles(req: Request, res: Response, next: NextFunction) {
             content: 0
         };
     }
-    let [list, total] = await queryArticle("article", {
+    let [list, total] = await queryArticle("articles", {
         page,
         keywords,
         secret,

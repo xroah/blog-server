@@ -31,7 +31,7 @@ function find(c: string, query: Object, options?: FindOneOptions) {
     return db.collection(c).find(query, options);
 }
 
-function findOne(c: string, query: Object, options: FindOneOptions) {
+function findOne(c: string, query: Object, options?: FindOneOptions) {
     return db.collection(c).findOne(query, options);
 }
 
