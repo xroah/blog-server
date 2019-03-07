@@ -6,7 +6,7 @@ import { getArticles } from "../../common";
 
 const router = Router();
 
-router.route("/list/:id?").get(getArticles)
+router.route("/articles/list/:id?").get(getArticles)
 .post(async (req, res) => {
     let { 
         title,

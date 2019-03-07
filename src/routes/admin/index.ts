@@ -2,10 +2,12 @@ import articleRouter from "./article";
 import { Router } from "express";
 import { findOne } from "../../db";
 import { md5, response } from "../../util";
+import clsRouter from "./classification";
 
 const apiRouter = Router();
 
-apiRouter.use("/articles", articleRouter);
+apiRouter.use(articleRouter);
+apiRouter.use(clsRouter);
 apiRouter.post("/login", async (req, res) => {
     let body: any = req.body;
     let s: any = req.session;

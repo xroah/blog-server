@@ -27,7 +27,7 @@ function insert(c: string, data: Object | Array<Object>, options?: CollectionIns
     return db.collection(c).insertOne(data, options)
 }
 
-function find(c: string, query: Object, options?: FindOneOptions) {
+function find(c: string, query: Object = {}, options?: FindOneOptions) {
     return db.collection(c).find(query, options);
 }
 
