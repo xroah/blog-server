@@ -10,7 +10,7 @@ admin.all("*", (req, res, next) => {
         return response(res, 403, null, "对不起您没有权限！");
     }
     next();
-})
+});
 
 admin.use(apiRouter);
 

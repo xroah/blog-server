@@ -3,7 +3,10 @@ import {
     Db,
     CollectionInsertManyOptions,
     FindOneOptions,
-    UpdateManyOptions
+    FindOneAndUpdateOption,
+    UpdateManyOptions,
+    CommonOptions
+
 } from "mongodb";
 import config from "../config";
 import qa, { Options } from "./queryArticle";
@@ -35,6 +38,10 @@ function findOne(c: string, query: Object, options?: FindOneOptions) {
     return db.collection(c).findOne(query, options);
 }
 
+function findOneAndUpdate(c: string, query: Object, update: Object, options?: FindOneAndUpdateOption) {
+    return db.collection(c).findOneAndUpdate(query, update, options);
+}
+
 function count(c: string) {
     return db.collection(c).countDocuments();
 }
@@ -50,12 +57,18 @@ function queryArticle(c: string, opts: Options) {
   return qa(db, c, opts); 
 }
 
+function deleteOne(c: string, filter: Object, options?: CommonOptions) {
+    return db.collection(c).deleteOne(filter, options);
+}
+
 export {
     connect,
     insert,
     find,
     findOne,
+    findOneAndUpdate,
     count,
     queryArticle,
-    update
+    update,
+    deleteOne
 }
