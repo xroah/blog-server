@@ -1,4 +1,9 @@
-import { Router, Request, Response } from "express";
+import {
+    Router,
+    Request,
+    Response,
+    NextFunction
+} from "express";
 import {
     find,
     findOneAndUpdate,
@@ -12,34 +17,32 @@ const router = Router();
 
 const COLLEC = "classifications";
 
-async function exists(name: string) {
-    try {
-        let ret = await findOne(COLLEC, {
-            name
-        }, {
-                projection: {
-                    _id: 0,
-                    name: 0,
-                    createTime: 0
-                }
-            });
-        return !!ret;
-    } catch (err) {
-        return err;
-    }
+function exists(name: string) {
+    return findOne(COLLEC, {
+        name
+    }, {
+            projection: {
+                _id: 0,
+                name: 0,
+                createTime: 0
+            }
+        });
 }
 
-async function update(req: Request, res: Response) {
+async function update(req: Request, res: Response, next: NextFunction) {
     let body = req.body;
     let ret;
     //新增,先检查分类是否存在
     if (!body.id) {
-        let isExists = await exists(body.name);
-        //报错
-        if (isExists.message) {
-             return response(res, 500, null, isExists.message);
+        let isExists;
+        try {
+            isExists = await exists(body.name);
+        } catch (err) {
+            return next(err);
         }
-        return response(res, 1, null, "分类已存在!");
+        if (isExists) {
+            return response(res, 1, null, "分类已存在!");
+        }
     }
     try {
         ret = await findOneAndUpdate(COLLEC, {
@@ -52,23 +55,22 @@ async function update(req: Request, res: Response) {
                 upsert: true
             })
     } catch (err) {
-        return response(res, 500, null, err.message);
+        return next(err);
     }
     response(res, 0, ret);
 }
 
-router.route("/classification").get(async (req, res) => {
+router.route("/classification").get(async (req, res, next) => {
     let ret;
     try {
         ret = await find(COLLEC).toArray();
-    } catch (error) {
-        response(res, 500, error, error.message);
-        return;
+    } catch (err) {
+        return next(err);
     }
     response(res, 0, ret);
 }).post(update)
     .put(update)
-    .delete(async (req, res) => {
+    .delete(async (req, res, next) => {
         let body = req.query;
         let _id = new ObjectID(body.id);
         let articles;
@@ -76,11 +78,13 @@ router.route("/classification").get(async (req, res) => {
             articles = await findOne("articles", {
                 clsId: _id
             }, {
-                projection: {
-                    _id: 1
-                }
-            });
-        } catch (error) {}
+                    projection: {
+                        _id: 1
+                    }
+                });
+        } catch (err) {
+            return next(err);
+         }
         if (articles) {
             response(res, 1, null, "该分类下有文章,不能删除!");
         }
@@ -90,7 +94,7 @@ router.route("/classification").get(async (req, res) => {
                 _id
             });
         } catch (err) {
-            return response(res, 500, null, err.message);
+            return next(err);
         }
         response(res, 0, ret);
     });

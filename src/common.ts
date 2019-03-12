@@ -15,13 +15,19 @@ async function getArticles(req: Request, res: Response, next: NextFunction) {
             content: 0
         };
     }
-    let [list, total] = await queryArticle("articles", {
-        page,
-        keywords,
-        secret,
-        id,
-        projection
-    });
+    let ret;
+    try {
+        ret = await queryArticle("articles", {
+            page,
+            keywords,
+            secret,
+            id,
+            projection
+        });
+    } catch (error) {
+        return next(error);
+    }
+    let [list, total] = ret;
     let data = {};
     if (id) {
         data = list[0];

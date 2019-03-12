@@ -1,29 +1,32 @@
-import { Router } from "express";
+import { Router, NextFunction } from "express";
 import { findOne, update } from "../../db";
 import { md5, response } from "../../util";
 
 const router = Router();
 
-async function userExists(username: string, password: string) {
+async function userExists(username: string, password: string, next: NextFunction) {
     try {
         let ret = await findOne("users", {
             username,
             password: md5(password)
+        }, {
+            projection: {
+                _id: 1
+            }
         });
         return ret;
-    } catch (error) {
-        return error;
+    } catch (err) {
+        next(err);
+        return "error";
     }
 }
 
-router.route("/login").post(async (req, res) => {
+router.route("/login").post(async (req, res, next) => {
     let body: any = req.body;
     let s: any = req.session;
-    let ret = await userExists(body.username, body.password);
+    let ret = await userExists(body.username, body.password, next);
     if (ret) {
-        if (ret.message) {
-            return response(res, 500, null, ret.message);
-        }
+        if (ret === "error") return;
         s.isAdmin = true;
         s.username = body.username;
         response(res, 0, null, "登录成功!");
@@ -41,14 +44,12 @@ router.route("/login").post(async (req, res) => {
  * @param {origPwd} 原密码
  * @param {newPwd} 新密码
  */
-router.post("/modifyPwd", async (req, res) => {
+router.post("/modifyPwd", async (req, res, next) => {
     let body = req.body;
     let s:any = req.session;
-    let ret = await userExists(s.username, body.origPwd);
+    let ret = await userExists(s.username, body.origPwd, next);
     if (ret) {
-        if (ret.message) {
-            return response(res, 500, null, ret.message);
-        }
+        if (ret === "error") return;
         try {
             await update("users", {
                 _id: ret._id
@@ -58,8 +59,8 @@ router.post("/modifyPwd", async (req, res) => {
                 }
             });
             response(res, 0, null);
-        } catch (error) {
-           return response(res, 500, null, error.message); 
+        } catch (err) {
+           next(err);
         }
     } else {
         response(res, 404, null, "原密码错误");

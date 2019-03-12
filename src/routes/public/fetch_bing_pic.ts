@@ -44,13 +44,12 @@ function handleReq(data: any) {
     };
 }
 
-router.get("/fetchBingPic", async (req, res) => {
+router.get("/fetchBingPic", async (req, res, next) => {
     let data;
     try {
        data = await fetchPic(); 
-    } catch (error) {
-        response(res, -1, error, "获取资源出错");
-        return;
+    } catch (err) {
+        return next(err);
     }
     let img = handleReq(data); 
     response(res, 0, img);
