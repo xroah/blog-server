@@ -1,12 +1,12 @@
-import {Router, Request, Response} from "express";
+import { Router, Request, Response } from "express";
 import {
     find,
     findOneAndUpdate,
     deleteOne,
     findOne
 } from "../../db";
-import {response} from "../../util";
-import {ObjectID} from "mongodb";
+import { response } from "../../util";
+import { ObjectID } from "mongodb";
 
 const router = Router();
 
@@ -17,35 +17,40 @@ async function exists(name: string) {
         let ret = await findOne(COLLEC, {
             name
         }, {
-            projection: {
-                _id: 0,
-                name: 0,
-                createTime: 0
-            }
-        });
+                projection: {
+                    _id: 0,
+                    name: 0,
+                    createTime: 0
+                }
+            });
         return !!ret;
     } catch (err) {
-        return false;
+        return err;
     }
 }
 
 async function update(req: Request, res: Response) {
     let body = req.body;
     let ret;
-    let isExists = await exists(body.name);
-    if (!body.id && isExists) {
+    //新增,先检查分类是否存在
+    if (!body.id) {
+        let isExists = await exists(body.name);
+        //报错
+        if (isExists.message) {
+             return response(res, 500, null, isExists.message);
+        }
         return response(res, 1, null, "分类已存在!");
     }
     try {
         ret = await findOneAndUpdate(COLLEC, {
             _id: new ObjectID(body.id)
         }, {
-            $set: {
-                name: body.name
-            }
-        }, {
-            upsert: true
-        })
+                $set: {
+                    name: body.name
+                }
+            }, {
+                upsert: true
+            })
     } catch (err) {
         return response(res, 500, null, err.message);
     }
@@ -65,10 +70,24 @@ router.route("/classification").get(async (req, res) => {
     .put(update)
     .delete(async (req, res) => {
         let body = req.query;
+        let _id = new ObjectID(body.id);
+        let articles;
+        try {
+            articles = await findOne("articles", {
+                clsId: _id
+            }, {
+                projection: {
+                    _id: 1
+                }
+            });
+        } catch (error) {}
+        if (articles) {
+            response(res, 1, null, "该分类下有文章,不能删除!");
+        }
         let ret;
         try {
             ret = await deleteOne(COLLEC, {
-                _id: new ObjectID(body.id)
+                _id
             });
         } catch (err) {
             return response(res, 500, null, err.message);
