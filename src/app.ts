@@ -4,13 +4,11 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import admin from "./admin";
 import publicRouter from "./routes/public";
-import log4js from "log4js";
+import log from "./logger";
 import { response } from "./util";
 
 const app = express();
 const RedisStore = connectRedis(session);
-const logger = log4js.getLogger("app");
-logger.level = "debug";
 
 app.use(session({
     secret: "my_blog",
@@ -33,7 +31,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.all("*", (req, res, next) => {
-    logger.debug(`method: ${req.method}, url: ${req.url}, params: ${JSON.stringify(req.body)}`);
+    log(`method: ${req.method}, url: ${req.url}, params: ${JSON.stringify(req.body)}`);
     next();
 });
 
@@ -42,7 +40,7 @@ app.use("/api/admin", admin);
 app.use("/api", publicRouter);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    logger.debug(`Error: ${req.method}, ${req.url}, ${err.stack}`);
+    log(`Error: ${req.method}, ${req.url}, ${err.stack}`);
     response(res, 500, null, err.message);
 });
 
