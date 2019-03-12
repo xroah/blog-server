@@ -4,3 +4,4 @@ uploads/
 .vscode
 .idea
 dist
+logs
