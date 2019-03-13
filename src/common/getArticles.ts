@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { queryArticle } from "./db";
-import { response } from "./util";
+import { queryArticle } from "../db";
+import { response } from "../util";
 
-async function getArticles(req: Request, res: Response, next: NextFunction) {
+export default async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;
     let secret = !!query.secret;
     let id = req.params.id;
@@ -38,8 +38,4 @@ async function getArticles(req: Request, res: Response, next: NextFunction) {
         };
     }
     response(res, 0, data);
-}
-
-export {
-    getArticles
 }
