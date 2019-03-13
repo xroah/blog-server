@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { queryArticle } from "../db";
-import { response } from "../util";
+import { response } from "../common";
 
 export default async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;

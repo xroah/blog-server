@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getArticles } from "../../common";
-import fetchPic from "./fetch_bing_pic";
+import fetchPic from "./fetchBingPic";
 
 const router = Router();
 

@@ -1,11 +1,10 @@
 import log4js from "log4js";
-import { resolve } from "path";
 
 log4js.configure({
     appenders: {
         log: {
             type: "dateFile",
-            filename: resolve(__dirname, "../logs/log"),
+            filename: "/tmp/blog-server/log",
             pattern: "yyyy-MM-dd.log",
             compress: true,
             alwaysIncludePattern: true
@@ -28,7 +27,6 @@ log4js.configure({
 
 const logFile = log4js.getLogger("log");
 const logConsole = log4js.getLogger("console");
-
 
 export default (msg: string) => {
     logFile.debug(msg);

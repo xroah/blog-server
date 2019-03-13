@@ -5,7 +5,7 @@ import connectRedis from "connect-redis";
 import admin from "./admin";
 import publicRouter from "./routes/public";
 import log from "./logger";
-import { response } from "./util";
+import { response } from "./common";
 
 const app = express();
 const RedisStore = connectRedis(session);
@@ -31,7 +31,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.all("*", (req, res, next) => {
-    log(`method: ${req.method}, url: ${req.url}, params: ${JSON.stringify(req.body)}`);
+    let query = JSON.stringify(req.query);
+    let body = JSON.stringify(req.body);
+    let headers = JSON.stringify(req.headers);
+    log(`Request: method: ${req.method}, url: ${req.url}, headers: ${headers} query: ${query}, body: ${body}`);
     next();
 });
 

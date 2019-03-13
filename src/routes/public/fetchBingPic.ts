@@ -1,6 +1,6 @@
 import https from "https";
 import { Router } from "express";
-import { response } from "../../util";
+import { response } from "../../common";
 
 let router = Router();
 

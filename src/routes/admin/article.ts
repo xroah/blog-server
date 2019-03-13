@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { response } from "../../util";
+import { response } from "../../common";
 import { insert } from "../../db";
 import { ObjectID } from "mongodb";
 import { getArticles } from "../../common";

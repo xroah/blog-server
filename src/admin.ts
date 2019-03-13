@@ -1,6 +1,6 @@
 import express from "express";
 import apiRouter from "./routes/admin"
-import { response } from "./util";
+import { response } from "./common";
 
 const admin = express();
 

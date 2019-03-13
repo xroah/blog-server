@@ -1,0 +1,62 @@
+import { Router } from "express";
+import multer from "multer";
+import { ObjectID } from "mongodb";
+import {
+    resolve,
+    extname
+} from "path";
+import {
+    access,
+    mkdir,
+    MakeDirectoryOptions
+} from "fs";
+import { response } from "../../common";
+import log from "../../logger";
+
+interface Callback {
+    (arg1?: any): void;
+}
+
+function _mkdir(dir: string, options: MakeDirectoryOptions, callback: Callback) {
+    dir = resolve("/root", dir);
+    access(dir, err => {
+        if (err) {
+            mkdir(dir, options, () => callback(dir));
+        } else {
+            callback(dir);
+        }
+    });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        let date = new Date();
+        let year = date.getFullYear();
+        let mon = date.getMonth() + 1;
+        let dir = `uploads/${year}/${mon}`;
+        _mkdir(
+            dir,
+            { recursive: true },
+            (dir: string) => {
+                log(`upload directory: ${dir}`);
+                cb(null, resolve(dir))
+            }
+        );
+    },
+    filename: function (req, file, cb) {
+        let ext = extname(file.originalname);
+        let filename = new ObjectID().toHexString();
+        filename = `${filename}${ext}`;
+        log(`upload file: ${filename}`);
+        cb(null, filename);
+    }
+});
+
+const upload = multer({ storage });
+
+const router = Router();
+
+router.post("/upload", upload.single("attachment"), async (req, res, next) => {
+    response(res, 0, null);
+});
+export default router;

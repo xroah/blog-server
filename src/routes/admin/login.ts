@@ -1,6 +1,7 @@
 import { Router, NextFunction } from "express";
 import { findOne, update } from "../../db";
-import { md5, response } from "../../util";
+import { md5 } from "../../util";
+import { response } from "../../common";
 
 const router = Router();
 
