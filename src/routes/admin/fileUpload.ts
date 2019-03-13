@@ -47,7 +47,7 @@ const storage = multer.diskStorage({
         let ext = extname(file.originalname);
         let filename = new ObjectID().toHexString();
         filename = `${filename}${ext}`;
-        log(`upload file: ${filename}`);
+        log(`upload file: ${JSON.stringify(file)}, saved filename: ${filename}`);
         cb(null, filename);
     }
 });

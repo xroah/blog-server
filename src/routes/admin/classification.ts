@@ -29,9 +29,18 @@ function exists(name: string) {
         });
 }
 
-async function update(req: Request, res: Response, next: NextFunction) {
-    let body = req.body;
+async function get(req: Request, res: Response, next: NextFunction) {
     let ret;
+    try {
+        ret = await find(COLLEC).toArray();
+    } catch (err) {
+        return next(err);
+    }
+    response(res, 0, ret);
+}
+
+async function beforeUpdate(req: Request, res: Response, next: NextFunction) {
+    let body = req.body;
     //新增,先检查分类是否存在
     if (!body.id) {
         let isExists;
@@ -44,6 +53,12 @@ async function update(req: Request, res: Response, next: NextFunction) {
             return response(res, 1, null, "分类已存在!");
         }
     }
+    next();
+}
+
+async function update(req: Request, res: Response, next: NextFunction) {
+    let body = req.body;
+    let ret;
     try {
         ret = await findOneAndUpdate(COLLEC, {
             _id: new ObjectID(body.id)
@@ -60,43 +75,43 @@ async function update(req: Request, res: Response, next: NextFunction) {
     response(res, 0, ret);
 }
 
-router.route("/classification").get(async (req, res, next) => {
+async function beforeDel(req: Request, res: Response, next: NextFunction) {
+    let _id = new ObjectID(req.body.id);
+    let articles;
+    try {
+        articles = await findOne("articles", {
+            clsId: _id
+        }, {
+                projection: {
+                    _id: 1
+                }
+            });
+    } catch (err) {
+        return next(err);
+    }
+    if (articles) {
+        return response(res, 1, null, "该分类下有文章,不能删除!");
+    }
+    next();
+}
+
+async function del(req: Request, res: Response, next: NextFunction) {
+    let _id = new ObjectID(req.body.id);
     let ret;
     try {
-        ret = await find(COLLEC).toArray();
+        ret = await deleteOne(COLLEC, {
+            _id
+        });
     } catch (err) {
         return next(err);
     }
     response(res, 0, ret);
-}).post(update)
-    .put(update)
-    .delete(async (req, res, next) => {
-        let body = req.query;
-        let _id = new ObjectID(body.id);
-        let articles;
-        try {
-            articles = await findOne("articles", {
-                clsId: _id
-            }, {
-                    projection: {
-                        _id: 1
-                    }
-                });
-        } catch (err) {
-            return next(err);
-         }
-        if (articles) {
-            response(res, 1, null, "该分类下有文章,不能删除!");
-        }
-        let ret;
-        try {
-            ret = await deleteOne(COLLEC, {
-                _id
-            });
-        } catch (err) {
-            return next(err);
-        }
-        response(res, 0, ret);
-    });
+}
+
+router.route("/classification")
+    .get(get)
+    .post(beforeUpdate, update)
+    .put(beforeUpdate, update)
+    .delete(beforeDel, del);
 
 export default router;
