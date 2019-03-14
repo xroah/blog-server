@@ -38,7 +38,7 @@ app.all("*", (req, res, next) => {
     next();
 });
 
-app.use("/api/admin", admin);
+app.use("/api/xsys", admin);
 
 app.use("/api", publicRouter);
 

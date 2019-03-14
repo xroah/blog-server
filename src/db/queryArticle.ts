@@ -11,7 +11,7 @@ export interface Options {
 
 export default function (db: Db, c: string, options: Options) {
     let collection: Collection = db.collection(c);
-    let { page = 1, keywords, id, projection, secret  } = options;
+    let { page = 1, keywords, id, projection, secret } = options;
     let $lookup: any = {
         from: "classifications",
         localField: "clsId",
@@ -53,10 +53,11 @@ export default function (db: Db, c: string, options: Options) {
                     createTime: -1
                 }
             }
-            );
-            promises.push(collection.countDocuments($match));
-        }
-        pipeline.unshift({$match});
-        promises.unshift(collection.aggregate(pipeline).toArray());
+        );
+        promises.push(collection.countDocuments($match));
+    }
+    pipeline.unshift({ $match });
+    console.log(pipeline)
+    promises.unshift(collection.aggregate(pipeline).toArray());
     return Promise.all(promises);
 }

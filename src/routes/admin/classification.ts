@@ -59,6 +59,9 @@ async function beforeUpdate(req: Request, res: Response, next: NextFunction) {
 async function update(req: Request, res: Response, next: NextFunction) {
     let body = req.body;
     let ret;
+    if (req.method.toLowerCase() === "put") {
+        return next(new Error("没有传id"));
+    }
     try {
         ret = await findOneAndUpdate(COLLEC, {
             _id: new ObjectID(body.id)
@@ -67,7 +70,7 @@ async function update(req: Request, res: Response, next: NextFunction) {
                     name: body.name
                 }
             }, {
-                upsert: true
+                upsert: !body.id
             })
     } catch (err) {
         return next(err);

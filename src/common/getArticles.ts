@@ -4,12 +4,14 @@ import { response } from "../common";
 
 export default async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;
-    let secret = !!query.secret;
-    let id = req.params.id;
-    let { page, keywords } = query;
+    let secret;
+    let { id, page, keywords } = query;
     let projection: Object = {
         secret: 0
     };
+    if (!(<any>req.session).isAdmin) {
+        secret = false;
+    }
     if (!id) {
         projection = {
             content: 0

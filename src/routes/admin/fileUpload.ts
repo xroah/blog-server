@@ -81,7 +81,7 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
         originalname,
         filename
     } = req.file;
-log(`Save file to database(resources): ${JSON.stringify(req.file)}`);
+    log(`Save file to database(resources): ${JSON.stringify(req.file)}`);
     try {
         await insert("resources", {
             album,
