@@ -14,8 +14,12 @@ import qa, { Options } from "./queryArticle";
 let db: Db;
 
 function connect(callback: Function) {
-    MongoClient.connect(config.devDbURL, {
-        useNewUrlParser: true
+    MongoClient.connect(`${config.devDbURL}${config.dbName}`, {
+        useNewUrlParser: true,
+        auth: {
+            user: config.dbUser,
+            password: config.dbPwd
+        }
     }, (err, client) => {
         if (err) throw err;
         db = client.db(config.dbName);
