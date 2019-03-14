@@ -1,4 +1,9 @@
-import { Router } from "express";
+import {
+    Router,
+    Request,
+    Response,
+    NextFunction
+} from "express";
 import multer from "multer";
 import { ObjectID } from "mongodb";
 import {
@@ -11,6 +16,7 @@ import {
     MakeDirectoryOptions
 } from "fs";
 import { response } from "../../common";
+import { insert } from "../../db";
 import log from "../../logger";
 
 interface Callback {
@@ -18,7 +24,7 @@ interface Callback {
 }
 
 function _mkdir(dir: string, options: MakeDirectoryOptions, callback: Callback) {
-    dir = resolve("/root", dir);
+    dir = `/root/${dir}`;
     access(dir, err => {
         if (err) {
             mkdir(dir, options, () => callback(dir));
@@ -39,7 +45,7 @@ const storage = multer.diskStorage({
             { recursive: true },
             (dir: string) => {
                 log(`upload directory: ${dir}`);
-                cb(null, resolve(dir))
+                cb(null, resolve(dir));
             }
         );
     },
@@ -52,11 +58,46 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage }).single("attachment");
 
 const router = Router();
 
-router.post("/upload", upload.single("attachment"), async (req, res, next) => {
+async function saveFile(req: Request, res: Response, next: NextFunction) {
+    upload(req, res, err => {
+        if (err) {
+            return next(err);
+        }
+        next();
+    });
+}
+
+async function save2Db(req: Request, res: Response, next: NextFunction) {
+    let album = req.body.album || null;
+    let {
+        mimetype,
+        path,
+        size,
+        encoding,
+        originalname,
+        filename
+    } = req.file;
+log(`Save file to database(resources): ${JSON.stringify(req.file)}`);
+    try {
+        await insert("resources", {
+            album,
+            createTime: new Date(),
+            mimetype,
+            path,
+            size,
+            encoding,
+            originalname,
+            filename
+        });
+    } catch (err) {
+        return next(err);
+    }
     response(res, 0, null);
-});
+}
+
+router.post("/upload", saveFile, save2Db);
 export default router;
