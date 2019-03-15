@@ -18,13 +18,13 @@ import {
 import { response } from "../../common";
 import { insert } from "../../db";
 import log from "../../logger";
+import config from "../../config";
 
 interface Callback {
     (arg1?: any): void;
 }
 
 function _mkdir(dir: string, options: MakeDirectoryOptions, callback: Callback) {
-    dir = `/root/${dir}`;
     access(dir, err => {
         if (err) {
             mkdir(dir, options, () => callback(dir));
@@ -39,7 +39,7 @@ const storage = multer.diskStorage({
         let date = new Date();
         let year = date.getFullYear();
         let mon = date.getMonth() + 1;
-        let dir = `uploads/${year}/${mon}`;
+        let dir = `${config.uploadBaseDir}/${config.uploadDir}/${year}/${mon}`;
         _mkdir(
             dir,
             { recursive: true },
@@ -96,7 +96,9 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
     } catch (err) {
         return next(err);
     }
-    response(res, 0, null);
+    response(res, 0, {
+        url: path.split(resolve(config.uploadBaseDir))[1]
+    });
 }
 
 router.post("/upload", saveFile, save2Db);

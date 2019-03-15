@@ -6,6 +6,8 @@ import admin from "./admin";
 import publicRouter from "./routes/public";
 import log from "./logger";
 import { response } from "./common";
+import { resolve } from "path";
+import config from "./config";
 
 const app = express();
 const RedisStore = connectRedis(session);
@@ -37,6 +39,12 @@ app.all("*", (req, res, next) => {
     log(`Request: method: ${req.method}, url: ${req.url}, headers: ${headers} query: ${query}, body: ${body}`);
     next();
 });
+
+if (process.env.NODE_ENV === "development") {
+    let dir = resolve(`${config.uploadBaseDir}${config.uploadDir}`);
+    let p = new RegExp(`\/*${config.uploadDir}`)
+    app.use(p, express.static(dir));
+}
 
 app.use("/api/xsys", admin);
 
