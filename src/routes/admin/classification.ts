@@ -22,9 +22,7 @@ function exists(name: string) {
         name
     }, {
             projection: {
-                _id: 0,
-                name: 0,
-                createTime: 0
+                _id: 1
             }
         });
 }
@@ -40,37 +38,43 @@ async function get(req: Request, res: Response, next: NextFunction) {
 }
 
 async function beforeUpdate(req: Request, res: Response, next: NextFunction) {
-    let body = req.body;
-    //新增,先检查分类是否存在
-    if (!body.id) {
-        let isExists;
-        try {
-            isExists = await exists(body.name);
-        } catch (err) {
-            return next(err);
-        }
-        if (isExists) {
+    let { id, name } = req.body;
+    //先检查是否有同名的分类
+    let isExists;
+    try {
+        isExists = await exists(name);
+        console.log(">>>>>>>>>>>>>>>>>>>>>>", isExists)
+    } catch (err) {
+        return next(err);
+    }
+    if (isExists) {
+        let _id = isExists._id.toString(); // cast ObjectID to string
+        if ((id && id !== _id) || !id) {
             return response(res, 1, null, "分类已存在!");
-        }
+        } 
     }
     next();
 }
 
 async function update(req: Request, res: Response, next: NextFunction) {
-    let body = req.body;
+    let { id, name } = req.body;
     let ret;
-    if (req.method.toLowerCase() === "put") {
+    if (req.method.toLowerCase() === "put" && !id) {
         return next(new Error("没有传id"));
+    }
+    let $set: any = {
+        name
+    };
+    if (!id) {
+        $set.createTime = new Date();
     }
     try {
         ret = await findOneAndUpdate(COLLEC, {
-            _id: new ObjectID(body.id)
+            _id: new ObjectID(id)
         }, {
-                $set: {
-                    name: body.name
-                }
+                $set
             }, {
-                upsert: !body.id
+                upsert: !id
             })
     } catch (err) {
         return next(err);
