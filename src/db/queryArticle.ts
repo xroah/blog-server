@@ -1,4 +1,4 @@
-import { Db, Collection, ObjectID } from "mongodb";
+import {Db, Collection, ObjectID} from "mongodb";
 import config from "../config";
 
 export interface Options {
@@ -11,7 +11,7 @@ export interface Options {
 
 export default function (db: Db, c: string, options: Options) {
     let collection: Collection = db.collection(c);
-    let { page = 1, keywords, id, projection, secret } = options;
+    let {page = 1, keywords, id, projection, secret} = options;
     let $lookup: any = {
         from: "classifications",
         localField: "clsId",
@@ -27,7 +27,7 @@ export default function (db: Db, c: string, options: Options) {
             clsName: "$cls.name",
         }
     }, {
-        $project: Object.assign({}, projection, { cls: 0 })
+        $project: Object.assign({}, projection, {cls: 0})
 
     }];
     let $match: any = {};
@@ -41,7 +41,9 @@ export default function (db: Db, c: string, options: Options) {
         if (keywords) {
             $match.content = new RegExp(keywords, "i");
         }
-        pipeline.unshift(
+        pipeline.splice(
+            1,
+            0,
             {
                 $skip: (page - 1) * config.PAGE_SIZE
             },
@@ -56,8 +58,7 @@ export default function (db: Db, c: string, options: Options) {
         );
         promises.push(collection.countDocuments($match));
     }
-    pipeline.unshift({ $match });
-    console.log(pipeline)
+    pipeline.unshift({$match});
     promises.unshift(collection.aggregate(pipeline).toArray());
     return Promise.all(promises);
 }

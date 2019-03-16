@@ -10,8 +10,8 @@ import {
     deleteOne,
     findOne
 } from "../../db";
-import { response } from "../../common";
-import { ObjectID } from "mongodb";
+import {response} from "../../common";
+import {ObjectID} from "mongodb";
 
 const router = Router();
 
@@ -21,16 +21,16 @@ function exists(name: string) {
     return findOne(COLLEC, {
         name
     }, {
-            projection: {
-                _id: 1
-            }
-        });
+        projection: {
+            _id: 1
+        }
+    });
 }
 
 async function get(req: Request, res: Response, next: NextFunction) {
     let ret;
     try {
-        ret = await find(COLLEC).toArray();
+        ret = await find(COLLEC, {}, {sort: {createTime: -1}}).toArray();
     } catch (err) {
         return next(err);
     }
@@ -38,7 +38,7 @@ async function get(req: Request, res: Response, next: NextFunction) {
 }
 
 async function beforeUpdate(req: Request, res: Response, next: NextFunction) {
-    let { id, name } = req.body;
+    let {id, name} = req.body;
     //先检查是否有同名的分类
     let isExists;
     try {
@@ -51,13 +51,13 @@ async function beforeUpdate(req: Request, res: Response, next: NextFunction) {
         let _id = isExists._id.toString(); // cast ObjectID to string
         if ((id && id !== _id) || !id) {
             return response(res, 1, null, "分类已存在!");
-        } 
+        }
     }
     next();
 }
 
 async function update(req: Request, res: Response, next: NextFunction) {
-    let { id, name } = req.body;
+    let {id, name} = req.body;
     let ret;
     if (req.method.toLowerCase() === "put" && !id) {
         return next(new Error("没有传id"));
@@ -72,10 +72,10 @@ async function update(req: Request, res: Response, next: NextFunction) {
         ret = await findOneAndUpdate(COLLEC, {
             _id: new ObjectID(id)
         }, {
-                $set
-            }, {
-                upsert: !id
-            })
+            $set
+        }, {
+            upsert: !id
+        })
     } catch (err) {
         return next(err);
     }
@@ -89,10 +89,10 @@ async function beforeDel(req: Request, res: Response, next: NextFunction) {
         articles = await findOne("articles", {
             clsId: _id
         }, {
-                projection: {
-                    _id: 1
-                }
-            });
+            projection: {
+                _id: 1
+            }
+        });
     } catch (err) {
         return next(err);
     }
