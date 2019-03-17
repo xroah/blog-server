@@ -27,7 +27,10 @@ export default function (db: Db, c: string, options: Options) {
             clsName: "$cls.name",
         }
     }, {
-        $project: Object.assign({}, projection, {cls: 0})
+        $project: {
+            ...projection,
+            cls: 0
+        }
 
     }];
     let $match: any = {};

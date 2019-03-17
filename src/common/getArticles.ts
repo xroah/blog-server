@@ -6,15 +6,17 @@ export default async function getArticles(req: Request, res: Response, next: Nex
     let { query } = req;
     let secret;
     let { id, page, keywords } = query;
-    let projection: Object = {
-        secret: 0
-    };
     if (!(<any>req.session).isAdmin) {
         secret = false;
     }
+    let projection: any = {};
     if (!id) {
         projection = {
             content: 0
+        };
+    } else {
+        projection = {
+            summary: 0
         };
     }
     let ret;
