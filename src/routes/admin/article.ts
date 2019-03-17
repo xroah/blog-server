@@ -29,7 +29,7 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
         clsId: new ObjectID(clsId),
         summary,
         lastUpdateTime: new Date()
-    }
+    };
     if (!title || secret === undefined || !clsId || !content || !summary) {
         return next(new Error("参数个数错误"));
     }
@@ -64,7 +64,7 @@ router.route("/articles/list")
     .post(updateArticle)
     .put(updateArticle)
     .delete(async (req, res, next) => {
-        let { id } = req.query;
+        let { id } = req.body;
         if (!id) {
             return next(new Error("没有传id"));
         }
