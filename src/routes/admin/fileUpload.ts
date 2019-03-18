@@ -81,6 +81,7 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
         originalname,
         filename
     } = req.file;
+    let url = path.split(resolve(config.uploadBaseDir))[1];
     log(`Save file to database(resources): ${JSON.stringify(req.file)}`);
     try {
         await insert("resources", {
@@ -88,6 +89,7 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
             createTime: new Date(),
             mimetype,
             path,
+            relPath: url,
             size,
             encoding,
             originalname,
@@ -97,7 +99,7 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
         return next(err);
     }
     response(res, 0, {
-        url: path.split(resolve(config.uploadBaseDir))[1]
+        url
     });
 }
 
