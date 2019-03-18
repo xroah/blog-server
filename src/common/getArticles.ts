@@ -11,10 +11,12 @@ export default async function getArticles(req: Request, res: Response, next: Nex
     }
     let projection: any = {};
     if (!id) {
+        //query article list
         projection = {
             content: 0
         };
     } else {
+        //query by id
         projection = {
             summary: 0
         };
