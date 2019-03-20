@@ -53,16 +53,17 @@ export default function (db: Db, c: string, options: Options) {
             1,
             0,
             {
+                $sort: {
+                    createTime: -1
+                }
+            },
+            {
                 $skip: (page - 1) * config.PAGE_SIZE
             },
             {
                 $limit: 10
-            },
-            {
-                $sort: {
-                    createTime: -1
-                }
             }
+
         );
         promises.push(collection.countDocuments($match));
     }

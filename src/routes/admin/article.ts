@@ -31,7 +31,7 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
         lastUpdateTime: new Date()
     };
     if (!title || secret === undefined || !clsId || !content || !summary) {
-        return next(new Error("参数个数错误"));
+        return next(new Error("参数错误"));
     }
     if (!id) {
         if (req.method.toLowerCase() === "put") {
