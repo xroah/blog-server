@@ -7,12 +7,26 @@ export interface Options {
     id?: string;
     projection?: Object;
     secret?: boolean,
-    comments?: boolean;
+    comment?: boolean;
 }
 
 export default function (db: Db, c: string, options: Options) {
     let collection: Collection = db.collection(c);
-    let { page = 1, keywords, id, projection, secret } = options;
+    let {
+        page = 1,
+        keywords,
+        id,
+        projection,
+        secret,
+        comment
+    } = options;
+    let $addFields: any = {
+        clsName: "$cls.name",
+    };
+    let $project: any = {
+        ...projection,
+        cls: 0
+    }
     let $lookup: any = {
         from: "classifications",
         localField: "clsId",
@@ -23,16 +37,6 @@ export default function (db: Db, c: string, options: Options) {
         $lookup
     }, {
         $unwind: "$cls",
-    }, {
-        $addFields: {
-            clsName: "$cls.name",
-        }
-    }, {
-        $project: {
-            ...projection,
-            cls: 0
-        }
-
     }];
     let $match: any = {};
     let promises: Array<any> = [];
@@ -40,8 +44,35 @@ export default function (db: Db, c: string, options: Options) {
         $match.secret = secret;
     }
     if (id) {
+        if (comment) {
+            let $lookupComment = {
+                from: "comments",
+                localField: "_id",
+                foreignField: "articleId",
+                as: "comments"
+            };
+            pipeline.unshift({ $lookup: $lookupComment });
+        }
         $match._id = new ObjectID(id);
     } else {
+        let queryCommentCount = [{
+            $lookup: {
+                from: "comments",
+                localField: "_id",
+                foreignField: "articleId",
+                as: "c"
+            }
+        }];
+        let other = [{
+            $sort: { createTime: -1 }
+        }, {
+            $skip: (page - 1) * config.PAGE_SIZE
+        },
+        {
+            $limit: 10
+        }];
+        $project.c = 0;
+        $addFields.comments = {$size: "$c"};
         page = Number(page);
         if (page <= 0 || isNaN(page)) {
             page = 1;
@@ -49,22 +80,7 @@ export default function (db: Db, c: string, options: Options) {
         if (keywords) {
             $match.content = new RegExp(keywords, "i");
         }
-        pipeline.splice(
-            1,
-            0,
-            {
-                $sort: {
-                    createTime: -1
-                }
-            },
-            {
-                $skip: (page - 1) * config.PAGE_SIZE
-            },
-            {
-                $limit: 10
-            }
-
-        );
+        pipeline = [...queryCommentCount, ...pipeline, ...other, { $addFields }, { $project }];
         promises.push(collection.countDocuments($match));
     }
     pipeline.unshift({ $match });

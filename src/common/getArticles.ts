@@ -7,7 +7,12 @@ export default async function getArticles(req: Request, res: Response, next: Nex
     let { query } = req;
     let idLen = new ObjectID().toHexString().length;
     let secret;
-    let { id, page, keywords } = query;
+    let {
+        id,
+        page,
+        keywords,
+        comment
+    } = query;
     if (!(<any>req.session).isAdmin) {
         secret = false;
     }
@@ -29,6 +34,7 @@ export default async function getArticles(req: Request, res: Response, next: Nex
     let ret;
     try {
         ret = await queryArticle("articles", {
+            comment: comment === "true" || comment === true,
             page,
             keywords,
             secret,

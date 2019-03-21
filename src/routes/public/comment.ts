@@ -55,7 +55,7 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
                 articleId: new ObjectID(articleId),
                 content,
                 username: s.isAdmin ? "作者" : username,
-                userHomepage,
+                userHomepage: s.isAdmin ? null : userHomepage,
                 replyTo: replyTo ? new ObjectID(replyTo) : null,
                 createTime: new Date()
             }
