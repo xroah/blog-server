@@ -6,7 +6,8 @@ import {
 } from "express";
 import {
     insert,
-    findOne
+    findOne,
+    find
 } from "../../db";
 import { response } from "../../common";
 import { ObjectID } from "mongodb";
@@ -66,6 +67,25 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
     response(res, 0, ret);
 }
 
-router.post("/comment", beforeSave, saveComment);
+async function getComments(req: Request, res: Response, next: NextFunction) {
+    let { articleId } = req.query;
+    let idLen = new ObjectID().toHexString().length;
+    if (!articleId || articleId.length !== idLen) {
+        return response(res, 0, []);
+    }
+    let ret;
+    try {
+        ret = await find("comments", {
+            articleId: new ObjectID(articleId)
+        }).toArray();
+    } catch (err) {
+        return next(err);
+    }
+    response(res, 0, ret);
+}
+
+router.route("/comment")
+.post(beforeSave, saveComment)
+.get(getComments);
 
 export default router;

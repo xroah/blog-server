@@ -10,8 +10,7 @@ export default async function getArticles(req: Request, res: Response, next: Nex
     let {
         id,
         page,
-        keywords,
-        comment
+        keywords
     } = query;
     if (!(<any>req.session).isAdmin) {
         secret = false;
@@ -34,7 +33,6 @@ export default async function getArticles(req: Request, res: Response, next: Nex
     let ret;
     try {
         ret = await queryArticle("articles", {
-            comment: comment === "true" || comment === true,
             page,
             keywords,
             secret,

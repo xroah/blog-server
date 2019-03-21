@@ -17,8 +17,7 @@ export default function (db: Db, c: string, options: Options) {
         keywords,
         id,
         projection,
-        secret,
-        comment
+        secret
     } = options;
     let $addFields: any = {
         clsName: "$cls.name",
@@ -26,7 +25,7 @@ export default function (db: Db, c: string, options: Options) {
     let $project: any = {
         ...projection,
         cls: 0
-    }
+    };
     let $lookup: any = {
         from: "classifications",
         localField: "clsId",
@@ -44,25 +43,28 @@ export default function (db: Db, c: string, options: Options) {
         $match.secret = secret;
     }
     if (id) {
-        if (comment) {
-            let $lookupComment = {
-                from: "comments",
-                localField: "_id",
-                foreignField: "articleId",
-                as: "comments"
-            };
-            pipeline.unshift({ $lookup: $lookupComment });
-        }
         $match._id = new ObjectID(id);
     } else {
         let queryCommentCount = [{
             $lookup: {
                 from: "comments",
-                localField: "_id",
-                foreignField: "articleId",
+                let: { aId: "$_id" },
+                pipeline: [{
+                    $match: {
+                        $expr: {
+                            $eq: ["$$aId", "$articleId"]
+                        }
+                    }
+                }, {
+                    $project: { _id: 1 }
+                }],
                 as: "c"
             }
         }];
+        page = Number(page);
+        if (page <= 0 || isNaN(page)) {
+            page = 1;
+        }
         let other = [{
             $sort: { createTime: -1 }
         }, {
@@ -72,11 +74,7 @@ export default function (db: Db, c: string, options: Options) {
             $limit: 10
         }];
         $project.c = 0;
-        $addFields.comments = {$size: "$c"};
-        page = Number(page);
-        if (page <= 0 || isNaN(page)) {
-            page = 1;
-        }
+        $addFields.comments = { $size: "$c" };
         if (keywords) {
             $match.content = new RegExp(keywords, "i");
         }
