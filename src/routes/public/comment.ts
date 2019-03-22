@@ -7,7 +7,7 @@ import {
 import {
     insert,
     findOne,
-    find
+    aggregate
 } from "../../db";
 import { response } from "../../common";
 import { ObjectID } from "mongodb";
@@ -45,7 +45,8 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
         content,
         username = null,
         replyTo,
-        userHomepage = null
+        userHomepage = null,
+        rootComment
     } = req.body;
     let s: any = req.session;
     let ret;
@@ -55,6 +56,7 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
             {
                 articleId: new ObjectID(articleId),
                 content,
+                rootComment: rootComment ? new ObjectID(rootComment) : null,
                 username: s.isAdmin ? "作者" : username,
                 userHomepage: s.isAdmin ? null : userHomepage,
                 replyTo: replyTo ? new ObjectID(replyTo) : null,
@@ -75,9 +77,38 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
     }
     let ret;
     try {
-        ret = await find("comments", {
-            articleId: new ObjectID(articleId)
-        }).toArray();
+        ret = await aggregate(
+            "comments", [{
+                $lookup: {
+                    from: "comments",
+                    let: { rto: "$replyTo" },
+                    pipeline: [{
+                        $match: {
+                            $expr: {
+                                $eq: ["$$rto", "$_id"]
+                            }
+                        }
+                    }, {
+                        $project: {
+                            username: 1,
+                            userHomepage: 1
+                        }
+                    }],
+                    as: "reply"
+                }
+            }, {
+                $addFields: {
+                    replyToUser: {
+                        $arrayElemAt: ["$reply", 0]
+                    }
+                }
+            }, {
+                $project: {
+                    reply: 0,
+                    replyTo: 0
+                }
+            }]
+        ).toArray();
     } catch (err) {
         return next(err);
     }
@@ -85,7 +116,7 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
 }
 
 router.route("/comment")
-.post(beforeSave, saveComment)
-.get(getComments);
+    .post(beforeSave, saveComment)
+    .get(getComments);
 
 export default router;

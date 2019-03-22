@@ -5,7 +5,8 @@ import {
     FindOneOptions,
     FindOneAndUpdateOption,
     UpdateManyOptions,
-    CommonOptions
+    CommonOptions,
+    CollectionAggregationOptions
 
 } from "mongodb";
 import config from "../config";
@@ -65,6 +66,10 @@ function deleteOne(c: string, filter: Object, options?: CommonOptions) {
     return db.collection(c).deleteOne(filter, options);
 }
 
+function aggregate(c: string, pipeline: Array<Object>, options?: CollectionAggregationOptions) {
+    return db.collection(c).aggregate(pipeline);
+}
+
 export {
     connect,
     insert,
@@ -74,5 +79,6 @@ export {
     count,
     queryArticle,
     update,
-    deleteOne
+    deleteOne,
+    aggregate
 }
