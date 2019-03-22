@@ -79,6 +79,10 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
     try {
         ret = await aggregate(
             "comments", [{
+                $match: {
+                    articleId: new ObjectID(articleId)
+                }
+            }, {
                 $lookup: {
                     from: "comments",
                     let: { rto: "$replyTo" },
