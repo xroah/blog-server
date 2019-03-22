@@ -6,13 +6,15 @@ import { ObjectID } from "mongodb";
 export default async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;
     let idLen = new ObjectID().toHexString().length;
+    let isPublic = req.path.startsWith("/api/articles");
     let secret;
     let {
         id,
         page,
         keywords
     } = query;
-    if (!(<any>req.session).isAdmin) {
+    //public api, filter secret articles
+    if (isPublic) {
         secret = false;
     }
     let projection: any = {};
@@ -37,6 +39,7 @@ export default async function getArticles(req: Request, res: Response, next: Nex
             keywords,
             secret,
             id,
+            count: isPublic,
             projection
         });
     } catch (error) {

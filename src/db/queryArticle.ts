@@ -8,6 +8,7 @@ export interface Options {
     id?: string;
     projection?: Object;
     secret?: boolean,
+    count?: boolean;
     comment?: boolean;
 }
 
@@ -18,7 +19,8 @@ export default function (db: Db, c: string, options: Options) {
         keywords,
         id,
         projection,
-        secret
+        secret,
+        count = true
     } = options;
     let $addFields: any = {
         clsName: "$cls.name",
@@ -80,7 +82,7 @@ export default function (db: Db, c: string, options: Options) {
             $match.content = new RegExp(keywords, "i");
         }
         pipeline = [...queryCommentCount, ...pipeline, ...other, { $addFields }, { $project }];
-        promises.push(collection.countDocuments($match));
+        count && promises.push(collection.countDocuments($match));
     }
     pipeline.unshift({ $match });
     logger(`Query article pipeline: ${JSON.stringify(pipeline)}`);
