@@ -1,5 +1,6 @@
 import { Db, Collection, ObjectID } from "mongodb";
 import config from "../config";
+import logger from "../logger";
 
 export interface Options {
     page?: number;
@@ -82,6 +83,7 @@ export default function (db: Db, c: string, options: Options) {
         promises.push(collection.countDocuments($match));
     }
     pipeline.unshift({ $match });
+    logger(`Query article pipeline: ${JSON.stringify(pipeline)}`);
     promises.unshift(collection.aggregate(pipeline).toArray());
     return Promise.all(promises);
 }
