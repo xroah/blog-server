@@ -6,7 +6,7 @@ import { ObjectID } from "mongodb";
 export default async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;
     let idLen = new ObjectID().toHexString().length;
-    let isPublic = req.path.startsWith("/api/articles");
+    let isPublic = req.originalUrl.startsWith("/api/articles");
     let secret;
     let {
         id,
@@ -39,7 +39,7 @@ export default async function getArticles(req: Request, res: Response, next: Nex
             keywords,
             secret,
             id,
-            count: isPublic,
+            count: !isPublic,
             projection
         });
     } catch (error) {
