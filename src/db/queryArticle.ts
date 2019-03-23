@@ -1,4 +1,4 @@
-import { Db, Collection, ObjectID } from "mongodb";
+import {Db, Collection, ObjectID} from "mongodb";
 import config from "../config";
 import logger from "../logger";
 
@@ -51,7 +51,7 @@ export default function (db: Db, c: string, options: Options) {
         let queryCommentCount = [{
             $lookup: {
                 from: "comments",
-                let: { aId: "$_id" },
+                let: {aId: "$_id"},
                 pipeline: [{
                     $match: {
                         $expr: {
@@ -59,7 +59,7 @@ export default function (db: Db, c: string, options: Options) {
                         }
                     }
                 }, {
-                    $project: { _id: 1 }
+                    $project: {_id: 1}
                 }],
                 as: "c"
             }
@@ -69,22 +69,23 @@ export default function (db: Db, c: string, options: Options) {
             page = 1;
         }
         let other = [{
-            $sort: { createTime: -1 }
+            $sort: {createTime: -1}
         }, {
             $skip: (page - 1) * config.PAGE_SIZE
         },
-        {
-            $limit: 10
-        }];
+            {
+                $limit: 10
+            }];
         $project.c = 0;
-        $addFields.comments = { $size: "$c" };
+        $addFields.comments = {$size: "$c"};
         if (keywords) {
             $match.content = new RegExp(keywords, "i");
         }
-        pipeline = [...queryCommentCount, ...pipeline, ...other, { $addFields }, { $project }];
+        pipeline = [...queryCommentCount, ...pipeline, ...other];
         count && promises.push(collection.countDocuments($match));
     }
-    pipeline.unshift({ $match });
+    pipeline.unshift({$match});
+    pipeline = [{$match}, ...pipeline, {$addFields}, {$project}];
     logger(`Query article pipeline: ${JSON.stringify(pipeline)}`);
     promises.unshift(collection.aggregate(pipeline).toArray());
     return Promise.all(promises);
