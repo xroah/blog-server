@@ -3,12 +3,14 @@ import { Router } from "express";
 import clsRouter from "./classification";
 import loginRouter from "./login";
 import uploadRouter from "./fileUpload";
+import comment from "./comment";
 
-const apiRouter = Router();
+const adminRouter = Router();
 
-apiRouter.use(articleRouter);
-apiRouter.use(clsRouter);
-apiRouter.use(loginRouter);
-apiRouter.use(uploadRouter);
+adminRouter.use(articleRouter);
+adminRouter.use(clsRouter);
+adminRouter.use(loginRouter);
+adminRouter.use(uploadRouter);
+adminRouter.use(comment);
 
-export default apiRouter;
+export default adminRouter;

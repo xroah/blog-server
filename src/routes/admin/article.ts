@@ -4,10 +4,13 @@ import {
     Response,
     NextFunction
 } from "express";
-import { response } from "../../common";
-import { findOneAndUpdate, update, deleteOne } from "../../db";
-import { ObjectID } from "mongodb";
-import { getArticles } from "../../common";
+import {response} from "../../common";
+import {
+    findOneAndUpdate,
+    del
+} from "../../db";
+import {ObjectID} from "mongodb";
+import {getArticles} from "../../common";
 
 const router = Router();
 
@@ -49,9 +52,9 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
     try {
         ret = await findOneAndUpdate(
             "articles",
-            { _id },
-            { $set: update },
-            { upsert: !id }
+            {_id},
+            {$set: update},
+            {upsert: !id}
         );
     } catch (error) {
         return next(error);
@@ -64,13 +67,13 @@ router.route("/articles/list")
     .post(updateArticle)
     .put(updateArticle)
     .delete(async (req, res, next) => {
-        let { id } = req.body;
+        let {id} = req.body;
         if (!id) {
             return next(new Error("没有传id"));
         }
         let ret = null;
         try {
-            ret = await deleteOne("articles", {_id: new ObjectID(id)})
+            ret = await del("articles", {_id: new ObjectID(id)})
         } catch (err) {
             next(err);
         }

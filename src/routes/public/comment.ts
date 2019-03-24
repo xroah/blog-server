@@ -60,7 +60,8 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
                 username: s.isAdmin ? "作者" : username,
                 userHomepage: s.isAdmin ? null : userHomepage,
                 replyTo: replyTo ? new ObjectID(replyTo) : null,
-                createTime: new Date()
+                createTime: new Date(),
+                audited: false
             }
         );
     } catch (err) {

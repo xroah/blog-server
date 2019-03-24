@@ -62,8 +62,16 @@ function queryArticle(c: string, opts: Options) {
   return qa(db, c, opts); 
 }
 
-function deleteOne(c: string, filter: Object, options?: CommonOptions) {
-    return db.collection(c).deleteOne(filter, options);
+interface DeleteOptions extends CommonOptions {
+    many?: boolean;
+}
+
+function del(c: string, filter: Object, options: DeleteOptions = {many: false}) {
+    let collec = db.collection(c);
+    if (options.many) {
+        return collec.deleteMany(filter, options);
+    }
+    return collec.deleteOne(filter, options);
 }
 
 function aggregate(c: string, pipeline: Array<Object>, options?: CollectionAggregationOptions) {
@@ -79,6 +87,6 @@ export {
     count,
     queryArticle,
     update,
-    deleteOne,
+    del,
     aggregate
 }

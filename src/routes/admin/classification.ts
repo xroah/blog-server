@@ -7,7 +7,7 @@ import {
 import {
     find,
     findOneAndUpdate,
-    deleteOne,
+    del,
     findOne
 } from "../../db";
 import {response} from "../../common";
@@ -102,11 +102,11 @@ async function beforeDel(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
-async function del(req: Request, res: Response, next: NextFunction) {
+async function deleteCls(req: Request, res: Response, next: NextFunction) {
     let _id = new ObjectID(req.body.id);
     let ret;
     try {
-        ret = await deleteOne(COLLEC, {
+        ret = await del(COLLEC, {
             _id
         });
     } catch (err) {
@@ -119,6 +119,6 @@ router.route("/classification")
     .get(get)
     .post(beforeUpdate, update)
     .put(beforeUpdate, update)
-    .delete(beforeDel, del);
+    .delete(beforeDel, deleteCls);
 
 export default router;
