@@ -6,7 +6,8 @@ import {
     FindOneAndUpdateOption,
     UpdateManyOptions,
     CommonOptions,
-    CollectionAggregationOptions
+    CollectionAggregationOptions,
+    MongoCountPreferences
 
 } from "mongodb";
 import config from "../config";
@@ -47,8 +48,8 @@ function findOneAndUpdate(c: string, query: Object, update: Object, options?: Fi
     return db.collection(c).findOneAndUpdate(query, update, options);
 }
 
-function count(c: string) {
-    return db.collection(c).countDocuments();
+function count(c: string, filter?: Object, options?: MongoCountPreferences) {
+    return db.collection(c).countDocuments(filter, options);
 }
 
 function update(c: string, filter: Object, update: Object | Array<Object>, options?: UpdateManyOptions) {

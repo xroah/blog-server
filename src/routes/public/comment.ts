@@ -78,42 +78,64 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
     }
     let ret;
     try {
+        articleId = new ObjectID(articleId);
         ret = await aggregate(
-            "comments", [{
+            "comments",
+            [{
                 $match: {
-                    articleId: new ObjectID(articleId)
+                    articleId
                 }
             }, {
                 $lookup: {
                     from: "comments",
-                    let: { rto: "$replyTo" },
+                    let: { rid: "$_id" },
                     pipeline: [{
                         $match: {
                             $expr: {
-                                $eq: ["$$rto", "$_id"]
+                                $eq: ["$$rid", "$rootComment"]
+                            }
+                        }
+                    }, {
+                        $lookup: {
+                            from: "comments",
+                            let: { rto: "$replyTo" },
+                            pipeline: [{
+                                $match: {
+                                    $expr: {
+                                        $eq: ["$$rto", "$_id"]
+                                    }
+                                }
+                            }, {
+                                $project: {
+                                    username: 1,
+                                    userHomepage: 1
+                                }
+                            }],
+                            as: "reply"
+                        }
+                    }, {
+                        $addFields: {
+                            replyToUser: {
+                                $arrayElemAt: ["$reply", 0]
                             }
                         }
                     }, {
                         $project: {
-                            username: 1,
-                            userHomepage: 1
+                            reply: 0,
+                            replyTo: 0
                         }
                     }],
-                    as: "reply"
+                    as: "repliers"
                 }
             }, {
-                $addFields: {
-                    replyToUser: {
-                        $arrayElemAt: ["$reply", 0]
+                $match: {
+                    rootComment: {
+                        $in: [null]
                     }
-                }
-            }, {
-                $project: {
-                    reply: 0,
-                    replyTo: 0
                 }
             }]
         ).toArray();
+
     } catch (err) {
         return next(err);
     }
