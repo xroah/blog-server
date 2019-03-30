@@ -1,33 +1,17 @@
-import https from "https";
-import { Router } from "express";
-import { response } from "../../common";
+import {Router} from "express";
+import {response} from "../../common";
+import {request} from "../../common";
 
 let router = Router();
 
-function fetchPic() {
-    return new Promise((resolve, reject) => {
-        let req = https.request({
-            hostname: "cn.bing.com",
-            path: "/HPImageArchive.aspx?format=js&idx=0&n=1"
-        }, res => {
-            let str = "";
-            res.on("end", function () {
-                resolve(JSON.parse(str));
-            });
-
-            res.on("data", chunk => {
-                str += chunk;
-            });
-        });
-
-        req.on("error", err => {
-            reject(err);
-        });
-        req.end();
+export function fetchPic() {
+    return request(true, {
+        hostname: "cn.bing.com",
+        path: "/HPImageArchive.aspx?format=js&idx=0&n=1"
     });
 }
 
-function handleReq(data: any) {
+export function parseUrl(data: any) {
     let img = data.images[0];
     let url = img.url;
     let hostname = "cn.bing.com";
@@ -39,6 +23,8 @@ function handleReq(data: any) {
         _path = url.pathname
     }
     return {
+        host: hostname,
+        path: _path,
         url: `//${hostname}/${_path}`,
         copyright: img.copyright
     };
@@ -47,11 +33,12 @@ function handleReq(data: any) {
 router.get("/fetchBingPic", async (req, res, next) => {
     let data;
     try {
-       data = await fetchPic(); 
+        data = await fetchPic();
+        data = JSON.parse(data.toString());
     } catch (err) {
         return next(err);
     }
-    let img = handleReq(data); 
+    let img = parseUrl(data);
     response(res, 0, img);
 });
 export default router;

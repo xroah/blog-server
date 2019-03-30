@@ -8,6 +8,7 @@ import log from "./logger";
 import { response } from "./common";
 import { resolve } from "path";
 import config from "./config";
+import "./schedule";
 
 const app = express();
 const RedisStore = connectRedis(session);
