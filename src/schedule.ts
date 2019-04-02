@@ -10,7 +10,7 @@ import {
     parseUrl
 } from "./routes/public/fetchBingPic";
 import path from "path";
-import {request} from "./common";
+import { request } from "./common";
 import fs from "fs";
 
 function connect(callback: Function) {
@@ -32,14 +32,18 @@ function connect(callback: Function) {
 function resetTodayViewed() {
     connect((db: Db, client: MongoClient) => {
         db.collection("articles")
-            .updateMany({
-                todayViewed: {
-                    $gt: 0
+            .updateMany(
+                {
+                    todayViewed: {
+                        $gt: 0
+                    }
+                },
+                {
+                    $set: {
+                        todayViewed: 0
+                    }
                 }
-            }, {
-                todayViewed: 0
-            })
-            .catch(() => 0);
+            ).catch(() => 0);
         client.close();
     });
 }
@@ -52,7 +56,7 @@ async function mkdir() {
     return new Promise((resolve, reject) => {
         fs.access(dir, err => {
             if (err) {
-                fs.mkdir(dir, {recursive: true}, err => {
+                fs.mkdir(dir, { recursive: true }, err => {
                     if (err) {
                         reject(err);
                     } else {
@@ -81,7 +85,7 @@ async function download(info: any) {
     let ext = path.extname(info.path.split("&")[0]);
     let name = info.copyright;
     let filename = `${new ObjectID()}${ext}`;
-    const mimeMap:any = {
+    const mimeMap: any = {
         ".jpg": "image/jpeg",
         ".png": "image/png"
     };
@@ -99,17 +103,17 @@ async function download(info: any) {
     let _path = `${dir}/${filename}`;
     fs.writeFile(_path, ret, (err) => {
         if (err) {
-           return console.log(err);
+            return console.log(err);
         }
         connect((db: Db, client: MongoClient) => {
             db.collection("resources").insertOne({
-                album : "bing",
-                createTime : new Date(),
-                mimetype : mimeMap[ext],
-                path : _path,
+                album: "bing",
+                createTime: new Date(),
+                mimetype: mimeMap[ext],
+                path: _path,
                 size: ret.length,
                 encoding: null,
-                relPath : _path.split(config.uploadBaseDir)[1],
+                relPath: _path.split(config.uploadBaseDir)[1],
                 originalname: name,
                 filename
             })
