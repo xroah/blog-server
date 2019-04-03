@@ -59,7 +59,7 @@ export default function (db: Db, c: string, options: Options) {
                         }
                     }
                 }, {
-                    $project: {_id: 1}
+                    $count: "count"
                 }],
                 as: "c"
             }
@@ -77,7 +77,7 @@ export default function (db: Db, c: string, options: Options) {
                 $limit: 10
             }];
         $project.c = 0;
-        $addFields.comments = {$size: "$c"};
+        $addFields.comments = {$arrayElemAt: ["$c", 0]};
         if (keywords) {
             $match.content = new RegExp(keywords, "i");
         }
