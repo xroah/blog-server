@@ -1,7 +1,30 @@
+//add to user home directory
 //add default album documents
 const conn = new Mongo();
-const db = conn.getDB("blog");
-const collection = db.getCollection("album");
+let db;
+
+db = conn.getDB("admin");
+
+db.auth("root", "123456");
+
+let user = db.getUser("root");
+
+if (!user) {
+    db.createUser({
+        user: "root",
+        pwd: "123456",
+        roles: ["root"]
+    });
+}
+
+db.logout();
+
+db = db.getSiblingDB("blog");
+
+db.auth("blogAdmin", "123456");
+
+let collection = db.getCollection("album");
+
 const album1 = collection.findOne({
     _id: 1
 });
@@ -14,10 +37,27 @@ function genDoc(id, name) {
         _id: id,
         name: name,
         createTime: new Date(),
-        secret: false
+        secret: false,
+        cover: null
     };
 }
 
 !album1 && collection.insertOne(genDoc(1, "文章图片"));
 
 !album2 && collection.insertOne(genDoc(2, "bing图片"));
+user = db.getUser("blogAdmin");
+
+if (!user) {
+    db.createUser({
+        user: "blogAdmin",
+        pwd: "123456",
+        roles: [{
+            role: "readWrite",
+            db: "blog"
+        }]
+    });
+}
+
+db.logout();
+
+print("----------------Excuted successfully.-----------------");
