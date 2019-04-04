@@ -75,6 +75,7 @@ async function startDownload() {
     try {
         img = await fetchPic();
     } catch (err) {
+        console.log(err)
         return;
     }
     let info = parseUrl(JSON.parse(img.toString()));
@@ -98,6 +99,7 @@ async function download(info: any) {
             path: info.path
         });
     } catch (err) {
+        console.log(err);
         return;
     }
     let _path = `${dir}/${filename}`;
@@ -107,7 +109,7 @@ async function download(info: any) {
         }
         connect((db: Db, client: MongoClient) => {
             db.collection("resources").insertOne({
-                album: "bing",
+                album: 2,
                 createTime: new Date(),
                 mimetype: mimeMap[ext],
                 path: _path,
@@ -116,7 +118,8 @@ async function download(info: any) {
                 relPath: _path.split(config.uploadBaseDir)[1],
                 originalname: name,
                 filename
-            })
+            });
+            client.close();
         })
     });
 }

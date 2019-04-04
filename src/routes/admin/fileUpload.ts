@@ -72,7 +72,7 @@ async function saveFile(req: Request, res: Response, next: NextFunction) {
 }
 
 async function save2Db(req: Request, res: Response, next: NextFunction) {
-    let album = req.body.album || null;
+    let album = req.body.album || 1;
     let {
         mimetype,
         path,
@@ -92,8 +92,8 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
             relPath: url,
             size,
             encoding,
-            originalname,
-            filename
+            originalname: originalname,
+            filename: filename
         });
     } catch (err) {
         return next(err);
