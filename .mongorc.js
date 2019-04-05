@@ -38,7 +38,8 @@ function genDoc(id, name) {
         name: name,
         createTime: new Date(),
         secret: false,
-        cover: null
+        cover: null,
+        desc: ""
     };
 }
 

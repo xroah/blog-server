@@ -4,6 +4,7 @@ import fetchPic from "./fetchBingPic";
 import dailySentence from "./fetchDailySentence";
 import updateViewedTime from "./updateViewedTime";
 import comment from "./comment";
+import album from "./album";
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use(fetchPic);
 router.use(comment);
 router.use(dailySentence);
 router.use(updateViewedTime);
+router.use(album);
 
 export default router;
