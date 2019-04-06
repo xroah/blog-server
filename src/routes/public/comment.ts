@@ -9,8 +9,8 @@ import {
     findOne,
     aggregate
 } from "../../db";
-import { response } from "../../common";
-import { ObjectID } from "mongodb";
+import {response} from "../../common";
+import {ObjectID} from "mongodb";
 
 const router = Router();
 
@@ -71,7 +71,7 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
 }
 
 async function getComments(req: Request, res: Response, next: NextFunction) {
-    let { articleId } = req.query;
+    let {articleId} = req.query;
     let idLen = new ObjectID().toHexString().length;
     if (!articleId || articleId.length !== idLen) {
         return response(res, 0, []);
@@ -83,12 +83,15 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
             "comments",
             [{
                 $match: {
-                    articleId
+                    articleId,
+                    rootComment: {
+                        $in: [null]
+                    }
                 }
             }, {
                 $lookup: {
                     from: "comments",
-                    let: { rid: "$_id" },
+                    let: {rid: "$_id"},
                     pipeline: [{
                         $match: {
                             $expr: {
@@ -98,7 +101,7 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
                     }, {
                         $lookup: {
                             from: "comments",
-                            let: { rto: "$replyTo" },
+                            let: {rto: "$replyTo"},
                             pipeline: [{
                                 $match: {
                                     $expr: {
@@ -126,12 +129,6 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
                         }
                     }],
                     as: "repliers"
-                }
-            }, {
-                $match: {
-                    rootComment: {
-                        $in: [null]
-                    }
                 }
             }]
         ).toArray();

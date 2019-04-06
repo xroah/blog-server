@@ -5,7 +5,6 @@ import { ObjectID } from "mongodb";
 
 export default async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;
-    let idLen = new ObjectID().toHexString().length;
     let isPublic = req.originalUrl.startsWith("/api/articles");
     let secret;
     let {
@@ -24,9 +23,6 @@ export default async function getArticles(req: Request, res: Response, next: Nex
             content: 0
         };
     } else {
-        if (id.length !== idLen) {
-            return response(res, 500, null, "文章不存在!");
-        }
         //query by id
         projection = {
             summary: 0

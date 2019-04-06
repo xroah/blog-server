@@ -68,16 +68,12 @@ router.route("/articles/list")
     .put(updateArticle)
     .delete(async (req, res, next) => {
         let {id} = req.body;
-        if (!id) {
-            return next(new Error("没有传id"));
-        }
-        let ret = null;
         try {
-            ret = await del("articles", {_id: new ObjectID(id)})
+            let ret = await del("articles", {_id: new ObjectID(id)});
+            response(res, 0, ret);
         } catch (err) {
             next(err);
         }
-        response(res, 0, ret);
     });
 
 export default router;
