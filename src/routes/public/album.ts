@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { getAlbum } from "../../common";
+import {
+    getAlbums,
+    getImages
+} from "../../common";
 
 const router = Router();
 
-router.route("/album").get(getAlbum);
+router.get("/album", getAlbums);
+router.get("/image", getImages);
 
 export default router;

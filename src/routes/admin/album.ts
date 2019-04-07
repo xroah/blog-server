@@ -5,7 +5,7 @@ import {
     NextFunction
 } from "express";
 import {
-    getAlbum,
+    getAlbums,
     response
 } from "../../common";
 import {
@@ -113,7 +113,7 @@ async function delAlbum(req: Request, res: Response, next: NextFunction) {
 
 
 router.route("/album")
-    .get(getAlbum)
+    .get(getAlbums)
     .post(beforeSave, save)
     .put(beforeSave, save)
     .delete(beforeDel, delAlbum);

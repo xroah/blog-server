@@ -5,7 +5,7 @@ import {
     NextFunction
 } from "express";
 import multer from "multer";
-import { ObjectID } from "mongodb";
+import {ObjectID} from "mongodb";
 import {
     resolve,
     extname
@@ -15,8 +15,8 @@ import {
     mkdir,
     MakeDirectoryOptions
 } from "fs";
-import { response } from "../../common";
-import { insert } from "../../db";
+import {response} from "../../common";
+import {insert} from "../../db";
 import log from "../../logger";
 import config from "../../config";
 
@@ -42,7 +42,7 @@ const storage = multer.diskStorage({
         let dir = `${config.uploadBaseDir}/${config.uploadDir}/${year}/${mon}`;
         _mkdir(
             dir,
-            { recursive: true },
+            {recursive: true},
             (dir: string) => {
                 log(`upload directory: ${dir}`);
                 cb(null, resolve(dir));
@@ -58,7 +58,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage }).single("attachment");
+const upload = multer({storage}).single("attachment");
 
 const router = Router();
 
@@ -72,7 +72,10 @@ async function saveFile(req: Request, res: Response, next: NextFunction) {
 }
 
 async function save2Db(req: Request, res: Response, next: NextFunction) {
-    let album = req.body.album || 1;
+    let {
+        albumId = 1,
+        name
+    } = req.body;
     let {
         mimetype,
         path,
@@ -85,7 +88,7 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
     log(`Save file to database(resources): ${JSON.stringify(req.file)}`);
     try {
         await insert("resources", {
-            album,
+            albumId,
             createTime: new Date(),
             mimetype,
             path,
@@ -93,7 +96,8 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
             size,
             encoding,
             originalname: originalname,
-            filename: filename
+            filename: filename,
+            name
         });
     } catch (err) {
         return next(err);

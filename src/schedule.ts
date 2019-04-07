@@ -109,7 +109,7 @@ async function download(info: any) {
         }
         connect((db: Db, client: MongoClient) => {
             db.collection("resources").insertOne({
-                album: 2,
+                albumId: 2,
                 createTime: new Date(),
                 mimetype: mimeMap[ext],
                 path: _path,
@@ -117,6 +117,7 @@ async function download(info: any) {
                 encoding: null,
                 relPath: _path.split(config.uploadBaseDir)[1],
                 originalname: name,
+                name,
                 filename
             });
             client.close();

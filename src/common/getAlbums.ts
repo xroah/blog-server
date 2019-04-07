@@ -28,7 +28,7 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
             pipeline: [{
                 $match: {
                     $expr: {
-                        $eq: ["$$aid", "$album"]
+                        $eq: ["$$aid", "$albumId"]
                     }
                 }
             }, {
