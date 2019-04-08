@@ -86,7 +86,7 @@ async function beforeDel(req: Request, res: Response, next: NextFunction) {
     }
     try {
         let ret = await findOne("resources", {
-            album: new ObjectID(id)
+            albumId: new ObjectID(id)
         });
         if (ret) {
             return next(new Error("该相册下有照片,不能删除!"));

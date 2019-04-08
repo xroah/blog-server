@@ -87,6 +87,11 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
     let url = path.split(resolve(config.uploadBaseDir))[1];
     log(`Save file to database(resources): ${JSON.stringify(req.file)}`);
     try {
+        if (albumId == 1 || albumId == 2) {
+            albumId = +albumId;
+        } else {
+            albumId = new ObjectID(albumId);
+        }
         await insert("resources", {
             albumId,
             createTime: new Date(),
