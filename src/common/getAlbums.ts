@@ -59,6 +59,7 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
             $match: query
         });
         let albums = await aggregate(collection, pipeline).toArray();
+        console.log(pipeline)
         response(res, 0, id ? albums[0] : albums);
     } catch (err) {
         next(err);

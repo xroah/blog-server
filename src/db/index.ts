@@ -7,7 +7,7 @@ import {
     UpdateManyOptions,
     CommonOptions,
     CollectionAggregationOptions,
-    MongoCountPreferences
+    MongoCountPreferences, FindOneAndDeleteOption
 
 } from "mongodb";
 import config from "../config";
@@ -48,15 +48,12 @@ function findOneAndUpdate(c: string, query: Object, update: Object, options?: Fi
     return db.collection(c).findOneAndUpdate(query, update, options);
 }
 
-function count(c: string, filter?: Object, options?: MongoCountPreferences) {
-    return db.collection(c).countDocuments(filter, options);
+function findOneAndDelete(c: string, query: Object, options?: FindOneAndDeleteOption) {
+    return db.collection(c).findOneAndDelete(query, options);
 }
 
-function update(c: string, filter: Object, update: Object | Array<Object>, options?: UpdateManyOptions) {
-    if (Array.isArray(update)) {
-        return db.collection(c).updateMany(filter, update, options);
-    }
-    return db.collection(c).updateOne(filter, update, options);
+function count(c: string, filter?: Object, options?: MongoCountPreferences) {
+    return db.collection(c).countDocuments(filter, options);
 }
 
 function queryArticle(c: string, opts: Options) {
@@ -85,9 +82,9 @@ export {
     find,
     findOne,
     findOneAndUpdate,
+    findOneAndDelete,
     count,
     queryArticle,
-    update,
     del,
     aggregate
 }
