@@ -1,14 +1,16 @@
-import {aggregate} from "../db";
+import { aggregate } from "../db";
 import {
     Request,
     Response,
     NextFunction
 } from "express";
 import response from "./response";
+import handleAlbumId from "./handleAlbumId";
 
 export default async function getAlbums(req: Request, res: Response, next: NextFunction) {
-    const {
-        originalUrl
+    let {
+        originalUrl,
+        query: { id }
     } = req;
     const isAdmin = !originalUrl.startsWith("/api/album");
     let collection = "albums";
@@ -18,8 +20,6 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
         query.secret = false;
     }
     pipeline.push({
-        $match: query
-    }, {
         $lookup: {
             from: "resources",
             let: {
@@ -37,19 +37,29 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
             as: "r"
         }
     }, {
-        $addFields: {
-            images: {
-                $arrayElemAt: ["$r", 0]
+            $addFields: {
+                images: {
+                    $arrayElemAt: ["$r", 0]
+                }
             }
-        }
-    }, {
-        $project: {
-            r: 0
-        }
-    });
+        }, {
+            $project: {
+                r: 0
+            }
+        });
     try {
+        if (id) {
+            id = handleAlbumId(id);
+            query._id = id;
+            pipeline.unshift({
+                $limit: 1
+            });
+        }
+        pipeline.unshift({
+            $match: query
+        });
         let albums = await aggregate(collection, pipeline).toArray();
-        response(res, 0, albums);
+        response(res, 0, id ? albums[0] : albums);
     } catch (err) {
         next(err);
     }
