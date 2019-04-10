@@ -4,11 +4,9 @@ import {
     CollectionInsertManyOptions,
     FindOneOptions,
     FindOneAndUpdateOption,
-    UpdateManyOptions,
     CommonOptions,
     CollectionAggregationOptions,
-    MongoCountPreferences, FindOneAndDeleteOption
-
+    MongoCountPreferences
 } from "mongodb";
 import config from "../config";
 import qa, { Options } from "./queryArticle";
@@ -48,7 +46,7 @@ function findOneAndUpdate(c: string, query: Object, update: Object, options?: Fi
     return db.collection(c).findOneAndUpdate(query, update, options);
 }
 
-function findOneAndDelete(c: string, query: Object, options?: FindOneAndDeleteOption) {
+function findOneAndDelete(c: string, query: Object, options?: Object) {
     return db.collection(c).findOneAndDelete(query, options);
 }
 

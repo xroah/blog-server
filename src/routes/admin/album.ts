@@ -6,14 +6,15 @@ import {
 } from "express";
 import {
     getAlbums,
-    response
+    response,
+    handleAlbumId
 } from "../../common";
 import {
     findOne,
     findOneAndUpdate,
     del
 } from "../../db";
-import {ObjectID} from "mongodb";
+import { ObjectID } from "mongodb";
 
 const router = Router();
 
@@ -24,7 +25,7 @@ async function beforeSave(req: Request, res: Response, next: NextFunction) {
     } = req.body;
     let exist;
     try {
-        exist = await findOne("albums", {name});
+        exist = await findOne("albums", { name });
         if (exist && exist._id.toString() !== id) {
             return next(new Error("相册已存在"));
         }
@@ -44,18 +45,15 @@ async function save(req: Request, res: Response, next: NextFunction) {
     if (!name.trim()) {
         return next(new Error("没有name"));
     }
-    let $set: any =  {
+    let $set: any = {
         name,
         desc,
-        secret: !!secret
+        secret: !!secret,
+        cover: null
     };
     try {
         if (id) {
-            if (id == 1 || id == 2) {
-                id = +id;
-            } else {
-                id = new ObjectID(id);
-            }
+            id = handleAlbumId(id);
         } else {
             id = new ObjectID();
             $set.createTime = new Date();
@@ -111,11 +109,32 @@ async function delAlbum(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-
 router.route("/album")
     .get(getAlbums)
     .post(beforeSave, save)
     .put(beforeSave, save)
     .delete(beforeDel, delAlbum);
+
+router.post("/setAlbumCover", async (req, res, next) => {
+    let {
+        albumId,
+        imageId
+    } = req.body;
+    try {
+        let ret = await findOneAndUpdate(
+            "albums",
+            {
+                _id: handleAlbumId(albumId)
+            },
+            {
+                $set: {
+                    cover: new ObjectID(imageId)
+                }
+            });
+        response(res, 0, ret);
+    } catch (err) {
+        next(err);
+    }
+});
 
 export default router;

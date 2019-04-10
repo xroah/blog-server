@@ -37,14 +37,41 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
             as: "r"
         }
     }, {
+            $lookup: {
+                from: "resources",
+                let: {
+                    cover: "$cover"
+                },
+                pipeline: [{
+                    $project: {
+                        _id: 1,
+                        relPath: 1,
+                    }
+                }, {
+                    $match: {
+                        $expr: {
+                            $eq: ["$$cover", "$_id"]
+                        }
+                    }
+                }, {
+                    $limit: 1
+                }],
+                as: "c"
+            }
+        }, {
             $addFields: {
                 images: {
                     $arrayElemAt: ["$r", 0]
+                },
+                coverInfo: {
+                    $arrayElemAt: ["$c", 0]
                 }
             }
         }, {
             $project: {
-                r: 0
+                r: 0,
+                cover: 0,
+                c: 0
             }
         });
     try {
@@ -59,7 +86,6 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
             $match: query
         });
         let albums = await aggregate(collection, pipeline).toArray();
-        console.log(pipeline)
         response(res, 0, id ? albums[0] : albums);
     } catch (err) {
         next(err);
