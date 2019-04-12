@@ -2,6 +2,7 @@ import { Router } from "express";
 import { findOneAndUpdate } from "../../db";
 import { ObjectID } from "mongodb";
 import { response } from "../../common";
+import { ARTICLES } from "../../db/collections";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ router.post("/updateViewedTime", async (req, res, next) => {
     let { articleId } = req.body;
     try {
         await findOneAndUpdate(
-            "articles",
+            ARTICLES,
             {
                 _id: new ObjectID(articleId)
             },

@@ -12,13 +12,12 @@ import {
 } from "../../db";
 import {response} from "../../common";
 import {ObjectID} from "mongodb";
+import { CLASSIFICATIONS } from "../../db/collections";
 
 const router = Router();
 
-const COLLEC = "classifications";
-
 function exists(name: string) {
-    return findOne(COLLEC, {
+    return findOne(CLASSIFICATIONS, {
         name
     }, {
         projection: {
@@ -30,7 +29,7 @@ function exists(name: string) {
 async function get(req: Request, res: Response, next: NextFunction) {
     let ret;
     try {
-        ret = await find(COLLEC, {}, {sort: {createTime: -1}}).toArray();
+        ret = await find(CLASSIFICATIONS, {}, {sort: {createTime: -1}}).toArray();
     } catch (err) {
         return next(err);
     }
@@ -43,7 +42,6 @@ async function beforeUpdate(req: Request, res: Response, next: NextFunction) {
     let isExists;
     try {
         isExists = await exists(name);
-        console.log(">>>>>>>>>>>>>>>>>>>>>>", isExists)
     } catch (err) {
         return next(err);
     }
@@ -69,7 +67,7 @@ async function update(req: Request, res: Response, next: NextFunction) {
         $set.createTime = new Date();
     }
     try {
-        ret = await findOneAndUpdate(COLLEC, {
+        ret = await findOneAndUpdate(CLASSIFICATIONS, {
             _id: new ObjectID(id)
         }, {
             $set
@@ -106,7 +104,7 @@ async function deleteCls(req: Request, res: Response, next: NextFunction) {
     let _id = new ObjectID(req.body.id);
     let ret;
     try {
-        ret = await del(COLLEC, {
+        ret = await del(CLASSIFICATIONS, {
             _id
         });
     } catch (err) {

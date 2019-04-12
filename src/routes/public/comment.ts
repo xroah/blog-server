@@ -9,8 +9,12 @@ import {
     findOne,
     aggregate
 } from "../../db";
-import {response} from "../../common";
-import {ObjectID} from "mongodb";
+import { response } from "../../common";
+import { ObjectID } from "mongodb";
+import {
+    ARTICLES,
+    COMMENTS
+} from "../../db/collections";
 
 const router = Router();
 
@@ -26,7 +30,7 @@ async function beforeSave(req: Request, res: Response, next: NextFunction) {
         return response(res, 1, null, "缺少评论内容!");
     }
     try {
-        article = await findOne("articles", {
+        article = await findOne(ARTICLES, {
             _id: new ObjectID(articleId)
         });
     } catch (err) {
@@ -52,7 +56,7 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
     let ret;
     try {
         ret = await insert(
-            "comments",
+            COMMENTS,
             {
                 articleId: new ObjectID(articleId),
                 content,
@@ -71,7 +75,7 @@ async function saveComment(req: Request, res: Response, next: NextFunction) {
 }
 
 async function getComments(req: Request, res: Response, next: NextFunction) {
-    let {articleId} = req.query;
+    let { articleId } = req.query;
     let idLen = new ObjectID().toHexString().length;
     if (!articleId || articleId.length !== idLen) {
         return response(res, 0, []);
@@ -80,7 +84,7 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
     try {
         articleId = new ObjectID(articleId);
         ret = await aggregate(
-            "comments",
+            COMMENTS,
             [{
                 $match: {
                     articleId,
@@ -91,7 +95,7 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
             }, {
                 $lookup: {
                     from: "comments",
-                    let: {rid: "$_id"},
+                    let: { rid: "$_id" },
                     pipeline: [{
                         $match: {
                             $expr: {
@@ -101,7 +105,7 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
                     }, {
                         $lookup: {
                             from: "comments",
-                            let: {rto: "$replyTo"},
+                            let: { rto: "$replyTo" },
                             pipeline: [{
                                 $match: {
                                     $expr: {

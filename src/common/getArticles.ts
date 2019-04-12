@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { queryArticle } from "../db";
 import { response } from "../common";
-import { ObjectID } from "mongodb";
+import { ARTICLES } from "../db/collections";
 
 export default async function getArticles(req: Request, res: Response, next: NextFunction) {
     let { query } = req;
@@ -30,7 +30,7 @@ export default async function getArticles(req: Request, res: Response, next: Nex
     }
     let ret;
     try {
-        ret = await queryArticle("articles", {
+        ret = await queryArticle(ARTICLES, {
             page,
             keywords,
             secret,

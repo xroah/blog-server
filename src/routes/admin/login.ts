@@ -8,6 +8,7 @@ import {
 } from "../../db";
 import { md5 } from "../../util";
 import { response } from "../../common";
+import { USERS } from "../../db/collections";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.route("/login").post(async (req, res, next) => {
     let s: any = req.session;
     let ret;
     try {
-        ret = await findOne("users", {
+        ret = await findOne(USERS, {
             username: body.username,
             password: md5(body.password)
         }, {
@@ -54,7 +55,7 @@ router.post("/modifyPwd", async (req, res, next) => {
     let ret;
     try {
         ret = await findOneAndUpdate(
-            "users",
+            USERS,
             {
                 username,
                 password: md5(origPwd)

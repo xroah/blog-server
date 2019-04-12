@@ -6,6 +6,10 @@ import {
 } from "express";
 import response from "./response";
 import handleAlbumId from "./handleAlbumId";
+import { 
+    ALBUMS,
+    RESOURCES
+ } from "../db/collections";
 
 export default async function getAlbums(req: Request, res: Response, next: NextFunction) {
     let {
@@ -13,7 +17,6 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
         query: { id }
     } = req;
     const isAdmin = !originalUrl.startsWith("/api/album");
-    let collection = "albums";
     let query: any = {};
     let pipeline: Array<Object> = [];
     if (!isAdmin) {
@@ -38,7 +41,7 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
         }
     }, {
             $lookup: {
-                from: "resources",
+                from: RESOURCES,
                 let: {
                     cover: "$cover"
                 },
@@ -85,7 +88,7 @@ export default async function getAlbums(req: Request, res: Response, next: NextF
         pipeline.unshift({
             $match: query
         });
-        let albums = await aggregate(collection, pipeline).toArray();
+        let albums = await aggregate(ALBUMS, pipeline).toArray();
         response(res, 0, id ? albums[0] : albums);
     } catch (err) {
         next(err);

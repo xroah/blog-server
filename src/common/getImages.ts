@@ -6,6 +6,7 @@ import {
 import { ObjectID } from "mongodb";
 import { find } from "../db";
 import { response } from "../common";
+import { RESOURCES } from "../db/collections";
 
 export default async function getImages(req: Request, res: Response, next: NextFunction) {
     let {
@@ -18,7 +19,7 @@ export default async function getImages(req: Request, res: Response, next: NextF
             albumId = new ObjectID(albumId);
         }
         let ret = await find(
-            "resources",
+            RESOURCES,
             { albumId },
             {
                 sort: {

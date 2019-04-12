@@ -1,11 +1,15 @@
-import {Router} from "express";
+import { Router } from "express";
 import {
     aggregate,
     count,
     del
 } from "../../db";
-import {response} from "../../common";
-import {ObjectID} from "mongodb";
+import { response } from "../../common";
+import { ObjectID } from "mongodb";
+import {
+    COMMENTS,
+    ARTICLES
+} from "../../db/collections";
 
 const router = Router();
 
@@ -14,8 +18,8 @@ const PAGE_SIZE = 10;
 function queryComments(page: number) {
     let pipeline = [{
         $lookup: {
-            from: "articles",
-            let: {aid: "$articleId"},
+            from: ARTICLES,
+            let: { aid: "$articleId" },
             pipeline: [{
                 $match: {
                     $expr: {
@@ -41,14 +45,14 @@ function queryComments(page: number) {
         $limit: PAGE_SIZE
     }];
     return Promise.all([
-        aggregate("comments", pipeline).toArray(),
-        count("comments")
+        aggregate(COMMENTS, pipeline).toArray(),
+        count(COMMENTS)
     ]);
 }
 
 router.route("/comment")
     .get(async (req, res, next) => {
-        let {page} = req.query;
+        let { page } = req.query;
         page = Number(page);
         if (page <= 0 || isNaN(page)) {
             page = 1;
@@ -64,14 +68,14 @@ router.route("/comment")
         }
     })
     .delete(async (req, res, next) => {
-        let {ids} = req.body;
+        let { ids } = req.body;
         if (!Array.isArray(ids)) {
             return next(new Error("参数不是数组"));
         }
         try {
             ids = ids.map(id => new ObjectID(id));
             let ret = await del(
-                "comments",
+                COMMENTS,
                 {
                     _id: {
                         $in: ids

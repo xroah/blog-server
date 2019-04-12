@@ -19,6 +19,7 @@ import {response} from "../../common";
 import {insert} from "../../db";
 import log from "../../logger";
 import config from "../../config";
+import { RESOURCES } from "../../db/collections";
 
 interface Callback {
     (arg1?: any): void;
@@ -92,7 +93,7 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
         } else {
             albumId = new ObjectID(albumId);
         }
-        await insert("resources", {
+        await insert(RESOURCES, {
             albumId,
             createTime: new Date(),
             mimetype,

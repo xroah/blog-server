@@ -15,6 +15,10 @@ import {
     del
 } from "../../db";
 import { ObjectID } from "mongodb";
+import {
+    ALBUMS,
+    RESOURCES
+} from "../../db/collections";
 
 const router = Router();
 
@@ -25,7 +29,7 @@ async function beforeSave(req: Request, res: Response, next: NextFunction) {
     } = req.body;
     let exist;
     try {
-        exist = await findOne("albums", { name });
+        exist = await findOne(ALBUMS, { name });
         if (exist && exist._id.toString() !== id) {
             return next(new Error("相册已存在"));
         }
@@ -59,7 +63,7 @@ async function save(req: Request, res: Response, next: NextFunction) {
             $set.createTime = new Date();
         }
         let ret = await findOneAndUpdate(
-            "albums",
+            ALBUMS,
             {
                 _id: id
             },
@@ -83,7 +87,7 @@ async function beforeDel(req: Request, res: Response, next: NextFunction) {
         return next(new Error("不能删除!"));
     }
     try {
-        let ret = await findOne("resources", {
+        let ret = await findOne(RESOURCES, {
             albumId: new ObjectID(id)
         });
         if (ret) {
@@ -100,7 +104,7 @@ async function delAlbum(req: Request, res: Response, next: NextFunction) {
         id
     } = req.body;
     try {
-        let ret = await del("albums", {
+        let ret = await del(ALBUMS, {
             _id: new ObjectID(id)
         });
         response(res, 0, ret);
@@ -122,7 +126,7 @@ router.post("/setAlbumCover", async (req, res, next) => {
     } = req.body;
     try {
         let ret = await findOneAndUpdate(
-            "albums",
+            ALBUMS,
             {
                 _id: handleAlbumId(albumId)
             },

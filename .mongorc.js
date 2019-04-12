@@ -23,7 +23,16 @@ db = db.getSiblingDB("blog");
 
 db.auth("blogAdmin", "123456");
 
-let collection = db.getCollection("album");
+let userCount = db.getCollection("users").count();
+
+if (!userCount) {
+    db.getCollection("users").insertOne({
+        username: "admin",
+        password: "14e1b600b1fd579f47433b88e8d85291"
+    });
+}
+
+let collection = db.getCollection("albums");
 
 const album1 = collection.findOne({
     _id: 1

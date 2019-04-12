@@ -11,6 +11,7 @@ import {
     findOneAndUpdate
 } from "../../db";
 import { unlink } from "fs";
+import { RESOURCES } from "../../db/collections";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.route("/image")
     .delete(async (req, res, next) => {
         let {id} = req.body;
         try {
-            let ret: any = await findOneAndDelete("resources", {
+            let ret: any = await findOneAndDelete(RESOURCES, {
                 _id: new ObjectID(id)
             });
             if (ret && ret.value) {
@@ -39,7 +40,7 @@ router.route("/image")
     }
     try {
         let ret = await findOneAndUpdate(
-            "resources",
+            RESOURCES,
             {
                 _id: new ObjectID(id)
             },

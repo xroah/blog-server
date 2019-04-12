@@ -1,6 +1,10 @@
 import {Db, Collection, ObjectID} from "mongodb";
 import config from "../config";
 import logger from "../logger";
+import {
+    COMMENTS,
+    CLASSIFICATIONS
+} from "./collections";
 
 export interface Options {
     page?: number;
@@ -30,7 +34,7 @@ export default function (db: Db, c: string, options: Options) {
         cls: 0
     };
     let $lookup: any = {
-        from: "classifications",
+        from: CLASSIFICATIONS,
         localField: "clsId",
         foreignField: "_id",
         as: "cls"
@@ -50,7 +54,7 @@ export default function (db: Db, c: string, options: Options) {
     } else {
         let queryCommentCount = [{
             $lookup: {
-                from: "comments",
+                from: COMMENTS,
                 let: {aId: "$_id"},
                 pipeline: [{
                     $match: {
