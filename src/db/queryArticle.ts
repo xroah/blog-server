@@ -88,7 +88,6 @@ export default function (db: Db, c: string, options: Options) {
         pipeline = [...queryCommentCount, ...pipeline, ...other];
         count && promises.push(collection.countDocuments($match));
     }
-    pipeline.unshift({$match});
     pipeline = [{$match}, ...pipeline, {$addFields}, {$project}];
     logger(`Query article pipeline: ${JSON.stringify(pipeline)}`);
     promises.unshift(collection.aggregate(pipeline).toArray());
