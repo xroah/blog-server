@@ -10,7 +10,7 @@ import {
     parseUrl
 } from "./routes/public/fetchBingPic";
 import path from "path";
-import { request } from "./common";
+import {request} from "./common";
 import fs from "fs";
 
 function connect(callback: Function) {
@@ -21,7 +21,7 @@ function connect(callback: Function) {
             password: config.dbPwd
         }
     }, (err, client) => {
-        if (err) throw err;
+        if (err) return print(err);
         let db = client.db(config.dbName);
         if (typeof callback === "function") {
             callback(db, client);
@@ -29,22 +29,31 @@ function connect(callback: Function) {
     });
 }
 
+function print(msg: any) {
+    console.log(msg);
+}
+
 function resetTodayViewed() {
-    connect((db: Db, client: MongoClient) => {
-        db.collection("articles")
-            .updateMany(
-                {
-                    todayViewed: {
-                        $gt: 0
+    connect(async (db: Db, client: MongoClient) => {
+        //reset article todayViewed to 0
+        try {
+            await db.collection("articles")
+                .updateMany(
+                    {
+                        todayViewed: {
+                            $gt: 0
+                        }
+                    },
+                    {
+                        $set: {
+                            todayViewed: 0
+                        }
                     }
-                },
-                {
-                    $set: {
-                        todayViewed: 0
-                    }
-                }
-            ).catch(() => 0);
-        client.close();
+                ).catch(() => 0);
+            await client.close();
+        } catch (err) {
+            print(err);
+        }
     });
 }
 
@@ -56,7 +65,7 @@ async function mkdir() {
     return new Promise((resolve, reject) => {
         fs.access(dir, err => {
             if (err) {
-                fs.mkdir(dir, { recursive: true }, err => {
+                fs.mkdir(dir, {recursive: true}, err => {
                     if (err) {
                         reject(err);
                     } else {
@@ -64,6 +73,7 @@ async function mkdir() {
                     }
                 });
             } else {
+                //dir already exists
                 resolve(dir);
             }
         });
@@ -75,21 +85,17 @@ async function startDownload() {
     try {
         img = await fetchPic();
     } catch (err) {
-        console.log(err)
+        print(err);
         return;
     }
     let info = parseUrl(JSON.parse(img.toString()));
-    download(info);
+    download(info).catch(e => e);
 }
 
 async function download(info: any) {
     let ext = path.extname(info.path.split("&")[0]);
     let name = info.copyright;
     let filename = `${new ObjectID()}${ext}`;
-    const mimeMap: any = {
-        ".jpg": "image/jpeg",
-        ".png": "image/png"
-    };
     let ret: any;
     let dir: any;
     try {
@@ -99,33 +105,61 @@ async function download(info: any) {
             path: info.path
         });
     } catch (err) {
-        console.log(err);
+        print(err);
         return;
     }
     let _path = `${dir}/${filename}`;
     fs.writeFile(_path, ret, (err) => {
         if (err) {
-            return console.log(err);
+            return print(err);
         }
-        connect((db: Db, client: MongoClient) => {
-            db.collection("resources").insertOne({
-                albumId: 2,
-                createTime: new Date(),
-                mimetype: mimeMap[ext],
-                path: _path,
-                size: ret.length,
-                encoding: null,
-                relPath: _path.split(config.uploadBaseDir)[1],
-                originalname: name,
-                name,
-                filename
-            });
-            client.close();
-        })
+        //after writing file, insert to database
+        insertImageToDb({
+            name,
+            filename,
+            path: _path,
+            size: ret.length,
+            ext
+        });
     });
 }
 
-schedule.scheduleJob("00 00 00 * * *", () => {
+interface FileProp {
+    filename: string;
+    name: string;
+    ext: string,
+    path: string;
+    size: number;
+}
+
+function insertImageToDb(file: FileProp) {
+    const mimeMap: any = {
+        ".jpg": "image/jpeg",
+        ".png": "image/png"
+    };
+    connect(async (db: Db, client: MongoClient) => {
+        try {
+            await db.collection("resources").insertOne({
+                albumId: 2,
+                createTime: new Date(),
+                mimetype: mimeMap[file.ext],
+                path: file.path,
+                size: file.size,
+                encoding: null,
+                relPath: file.path.split(config.uploadBaseDir)[1],
+                originalname: file.name,
+                name: file.name,
+                filename: file.filename
+            });
+            await client.close();
+        } catch (err) {
+            print(err);
+        }
+    })
+}
+
+schedule.scheduleJob("00 27 * * * *", () => {
     resetTodayViewed();
-    startDownload();
+    startDownload().catch(e => e);
+    print("===============schedule executed successfully===============");
 });

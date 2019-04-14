@@ -1,10 +1,17 @@
 import config from "./config";
 import app from "./app";
 import http from "http";
-import https from "https";
 import {connect} from "./db";
-import { MongoClient, Db } from "mongodb";
+import {fork} from "child_process";
 
-connect((client: MongoClient, db: Db) => {
+connect(() => {
     http.createServer(app).listen(config.port);
+});
+
+const CHILD_PATH = `${__dirname}/schedule`;
+
+let child = fork(CHILD_PATH);
+
+child.on("exit", () => {
+    child = fork(CHILD_PATH);
 });
