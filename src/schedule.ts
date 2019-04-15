@@ -158,7 +158,7 @@ function insertImageToDb(file: FileProp) {
     })
 }
 
-schedule.scheduleJob("00 27 * * * *", () => {
+schedule.scheduleJob("00 00 00 * * *", () => {
     resetTodayViewed();
     startDownload().catch(e => e);
     print("===============schedule executed successfully===============");
