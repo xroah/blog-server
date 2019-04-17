@@ -4,3 +4,4 @@ export const COMMENTS = "comments";
 export const ALBUMS = "albums";
 export const USERS = "users";
 export const RESOURCES = "resources";
+export const VERSIONS = "versions";
