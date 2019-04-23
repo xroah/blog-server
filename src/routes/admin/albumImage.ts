@@ -24,7 +24,7 @@ router.route("/image")
                 _id: new ObjectID(id)
             });
             if (ret && ret.value) {
-                unlink(ret.value.path, err => 0);
+                unlink(ret.value.path, e => e);
             }
             response(res, 0, ret);
         } catch (err) {
