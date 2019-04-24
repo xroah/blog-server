@@ -4,19 +4,22 @@ import {
     Response,
     NextFunction
 } from "express";
-import {response} from "../../common";
+import { response } from "../../common";
 import {
     findOneAndUpdate,
-    del
+    del,
+    updateMany,
+    find
 } from "../../db";
-import {ObjectID} from "mongodb";
-import {getArticles} from "../../common";
+import { ObjectID } from "mongodb";
+import { getArticles } from "../../common";
 import {
     ARTICLES,
     RESOURCES
 } from "../../db/collections";
-import {delFiles} from "../../util";
-import config  from "../../config";
+import { delFiles } from "../../util";
+import config from "../../config";
+import { resolve } from "path";
 
 const router = Router();
 
@@ -29,7 +32,8 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
         tags = [],
         clsId,
         summary,
-        delImages
+        delImages,
+        uploadedImages
     } = req.body;
     let update: any = {
         title,
@@ -54,28 +58,48 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
             todayViewed: 0
         }
     }
-    let _id = new ObjectID(id);
     let ret = null;
     let imgPaths = [];
     try {
+        let _id = new ObjectID(id);
+        //delete the images when edit
         if (Array.isArray(delImages) && delImages.length) {
             for (let img of delImages) {
-                imgPaths.push(`${config.uploadBaseDir}${img}`);
+                imgPaths.push(resolve(`${config.uploadBaseDir}${img}`));
             }
-            await del(RESOURCES, {
-                path: {
-                    $in: imgPaths
-                }
-            }, {
-                many: true
-            });
+            await del(
+                RESOURCES,
+                {
+                    path: {
+                        $in: imgPaths
+                    }
+                },
+                {
+                    many: true
+                });
             delFiles(imgPaths);
+        }
+        //update articleId of the uploaded images 
+        if (Array.isArray(uploadedImages) && uploadedImages.length) {
+            await updateMany(
+                RESOURCES,
+                {
+                    relPath: {
+                        $in: uploadedImages
+                    }
+                },
+                {
+                    $set: {
+                        articleId: _id
+                    }
+                }
+            );
         }
         ret = await findOneAndUpdate(
             ARTICLES,
-            {_id},
-            {$set: update},
-            {upsert: !id}
+            { _id },
+            { $set: update },
+            { upsert: !id }
         );
     } catch (error) {
         return next(error);
@@ -88,9 +112,23 @@ router.route("/articles/list")
     .post(updateArticle)
     .put(updateArticle)
     .delete(async (req, res, next) => {
-        let {id} = req.body;
+        let { id } = req.body;
         try {
-            let ret = await del(ARTICLES, {_id: new ObjectID(id)});
+            let _id = new ObjectID(id);
+            //find images of the article, then delete them from db and disk
+            let images: Array<any> = await find(RESOURCES, {
+                articleId: _id
+            }).toArray();
+            if (images.length) {
+                images = images.map(img => img.path);
+                await del(RESOURCES, {
+                    articleId: _id
+                }, {
+                    many: true
+                });
+                delFiles(images);
+            }
+            let ret = await del(ARTICLES, { _id });
             response(res, 0, ret);
         } catch (err) {
             next(err);

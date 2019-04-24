@@ -6,7 +6,8 @@ import {
     FindOneAndUpdateOption,
     CommonOptions,
     CollectionAggregationOptions,
-    MongoCountPreferences
+    MongoCountPreferences,
+    UpdateManyOptions
 } from "mongodb";
 import config from "../config";
 import qa, { Options } from "./queryArticle";
@@ -74,6 +75,10 @@ function aggregate(c: string, pipeline: Array<Object>, options?: CollectionAggre
     return db.collection(c).aggregate(pipeline);
 }
 
+function updateMany(c: string, filter: Object, update: Object, options?: UpdateManyOptions) {
+    return db.collection(c).updateMany(filter, update, options);
+}
+
 export {
     connect,
     insert,
@@ -84,5 +89,6 @@ export {
     count,
     queryArticle,
     del,
-    aggregate
+    aggregate,
+    updateMany
 }

@@ -75,7 +75,8 @@ async function saveFile(req: Request, res: Response, next: NextFunction) {
 async function save2Db(req: Request, res: Response, next: NextFunction) {
     let {
         albumId = 1,
-        name
+        name,
+        isArticle
     } = req.body;
     let {
         mimetype,
@@ -103,7 +104,8 @@ async function save2Db(req: Request, res: Response, next: NextFunction) {
             encoding,
             originalname: originalname,
             filename: filename,
-            name
+            name,
+            isArticle: !!isArticle
         });
     } catch (err) {
         return next(err);
