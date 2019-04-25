@@ -42,8 +42,10 @@ app.all("*", (req, res, next) => {
 
 if (process.env.NODE_ENV === "development") {
     let dir = resolve(`${config.uploadBaseDir}${config.uploadDir}`);
-    let p = new RegExp(`\/*${config.uploadDir}`)
+    let p = new RegExp(`\/*${config.uploadDir}`);
+    let staticPath = resolve(__dirname, "../static/");
     app.use(p, express.static(dir));
+    app.use("/static", express.static(staticPath));
 }
 
 app.use("/api/xsys", admin);
