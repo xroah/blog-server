@@ -90,7 +90,8 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
                 },
                 {
                     $set: {
-                        articleId: _id
+                        articleId: _id,
+                        name: title
                     }
                 }
             );
