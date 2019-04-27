@@ -10,6 +10,7 @@ import dailySentence from "./fetchDailySentence";
 import updateViewedTime from "./updateViewedTime";
 import comment from "./comment";
 import album from "./album";
+import downloadImages from "./downloadImages";
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.use(comment);
 router.use(dailySentence);
 router.use(updateViewedTime);
 router.use(album);
+router.use(downloadImages);
 
 router.get("/version", async (req, res, next) => {
     try {
