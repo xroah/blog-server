@@ -2,7 +2,8 @@ import archiver from "archiver";
 import {
     createReadStream,
     createWriteStream,
-    mkdir
+    mkdir,
+    unlink
 } from "fs";
 import {find} from "../../db";
 import {
@@ -66,7 +67,7 @@ async function createFile(req: Request, res: Response, next: NextFunction) {
                 level: 9
             }
         });
-        zip.on("error", err => next(err));
+        zip.on("error", (err: Error) => next(err));
         zip.on("end", () => next());
         zip.pipe(output);
         images.forEach(img => {
@@ -81,14 +82,19 @@ async function createFile(req: Request, res: Response, next: NextFunction) {
 
 function download(req: Request, res: Response, next: NextFunction) {
     const {filename} = req.query;
-    const stream = createReadStream(`${TMP_DIR}/${filename}`);
+    const path = `${TMP_DIR}/${filename}`;
+    const stream = createReadStream(path);
     res.set({
         "Content-Type": "application/octet-stream",
         "Content-Disposition": `attachment; filename="${encodeURI(filename)}"`
     });
     stream.pipe(res);
     stream.on("error", err => next(err));
-    stream.on("end", () => res.end())
+    stream.on("end", () => {
+        //delete the file
+        unlink(path, e => e);
+        res.end();
+    })
 }
 
 router.get("/downloadImages", createFile, download);
