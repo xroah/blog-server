@@ -9,7 +9,8 @@ import {
     findOneAndUpdate,
     del,
     updateMany,
-    find
+    find,
+    findOne
 } from "../../db";
 import { ObjectID } from "mongodb";
 import { getArticles } from "../../common";
@@ -40,9 +41,9 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
         content,
         secret,
         tags,
-        clsId: new ObjectID(clsId),
         summary,
-        lastUpdateTime: new Date()
+        lastUpdateTime: new Date(),
+        isDraft: false
     };
     if (!title || secret === undefined || !clsId || !content || !summary) {
         return next(new Error("参数错误"));
@@ -62,6 +63,7 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
     let imgPaths = [];
     try {
         let _id = new ObjectID(id);
+        update.clsId = new ObjectID(clsId);
         //delete the images when edit
         if (Array.isArray(delImages) && delImages.length) {
             for (let img of delImages) {
@@ -100,7 +102,7 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
             ARTICLES,
             { _id },
             { $set: update },
-            { upsert: !id }
+            { upsert: true }
         );
     } catch (error) {
         return next(error);
@@ -109,7 +111,22 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
 }
 
 router.route("/articles/list")
-    .get(getArticles)
+    .get(async (req, res, next) => {
+        let { isDraft, id } = req.query;
+        if (isDraft && JSON.parse(isDraft)) {
+            try {
+                let ret = await findOne(
+                    ARTICLES,
+                    { _id: new ObjectID(id) }
+                );
+                response(res, 0, ret);
+            } catch (err) {
+                next(err);
+            }
+        } else {
+            getArticles(req, res, next);
+        }
+    })
     .post(updateArticle)
     .put(updateArticle)
     .delete(async (req, res, next) => {
@@ -125,8 +142,8 @@ router.route("/articles/list")
                 await del(RESOURCES, {
                     articleId: _id
                 }, {
-                    many: true
-                });
+                        many: true
+                    });
                 delFiles(images);
             }
             let ret = await del(ARTICLES, { _id });
@@ -135,5 +152,55 @@ router.route("/articles/list")
             next(err);
         }
     });
+
+async function updateDraft(req: Request, res: Response, next: NextFunction) {
+    let {
+        id,
+        title,
+        content,
+        secret,
+        tags = [],
+        clsId,
+        summary
+    } = req.body;
+    let update: any = {
+        title,
+        content,
+        secret,
+        tags,
+        clsId,
+        summary,
+        lastUpdateTime: new Date(),
+        isDraft: true
+    };
+    if (!id) {
+        update.createTime = new Date();
+    }
+    try {
+        let _id = new ObjectID(id);
+        let ret = await findOneAndUpdate(
+            ARTICLES,
+            { _id },
+            { $set: update },
+            { upsert: true }
+        );
+        response(res, 0, ret);
+    } catch (err) {
+        next(err);
+    }
+}
+
+router
+    .route("/articles/drafts")
+    .get(async (req, res, next) => {
+        try {
+            let ret = await find(ARTICLES, { isDraft: true }).toArray();
+            response(res, 0, ret);
+        } catch (err) {
+            next(err);
+        }
+    })
+    .put(updateDraft)
+    .post(updateDraft);
 
 export default router;
