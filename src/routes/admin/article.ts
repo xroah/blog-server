@@ -10,7 +10,8 @@ import {
     del,
     updateMany,
     find,
-    findOne
+    findOne,
+    count
 } from "../../db";
 import { ObjectID } from "mongodb";
 import { getArticles } from "../../common";
@@ -107,13 +108,13 @@ async function updateArticle(req: Request, res: Response, next: NextFunction) {
     } catch (error) {
         return next(error);
     }
-    response(res, 0, ret)
+    response(res, 0, ret);
 }
 
 router.route("/articles/list")
     .get(async (req, res, next) => {
-        let { isDraft, id } = req.query;
-        if (isDraft && JSON.parse(isDraft)) {
+        let { id, isEdit } = req.query;
+        if (isEdit == "true") {
             try {
                 let ret = await findOne(
                     ARTICLES,
@@ -202,5 +203,19 @@ router
     })
     .put(updateDraft)
     .post(updateDraft);
+
+router.get("/articles/count", async (req, res, next) => {
+    try {
+        let published = await count(ARTICLES, {$or: [{
+            isDraft: false
+        }, {
+            isDraft: null
+        }]});
+        let draft = await count(ARTICLES, {isDraft: true});
+        response(res, 0, {published, draft});
+    } catch (err) {
+        next(err);
+    }
+});
 
 export default router;
