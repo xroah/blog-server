@@ -92,12 +92,21 @@ async function startDownload() {
     download(info).catch(e => e);
 }
 
+function getDate() {
+    var date = new Date();
+    var year = date.getFullYear();
+    var day = date.getDate();
+    var mon = date.getMonth();
+    return `${year}-${mon}-${day}`;
+}
+
 async function download(info: any) {
     let ext = path.extname(info.path.split("&")[0]);
-    let name = info.copyright;
+    let name = info.copyright.replace(/\//g, "、");
     let filename = `${new ObjectID()}${ext}`;
     let ret: any;
     let dir: any;
+    name = getDate() + name;
     try {
         dir = await mkdir();
         ret = await request(true, {
