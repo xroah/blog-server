@@ -96,7 +96,7 @@ function getDate() {
     var date = new Date();
     var year = date.getFullYear();
     var day = date.getDate();
-    var mon = date.getMonth();
+    var mon = date.getMonth() + 1;
     return `${year}-${mon}-${day}`;
 }
 
