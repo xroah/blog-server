@@ -1,8 +1,0 @@
-/node_modules/
-uploads/
-.history
-.vscode
-.idea
-dist
-logs
-src/config.ts
