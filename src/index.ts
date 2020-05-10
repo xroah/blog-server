@@ -1,12 +1,10 @@
-import express from "express";
-import { 
+import {
     PORT,
     DB_NAME,
     DB_URL
- } from "./config";
+} from "./config";
 import { MongoClient } from "mongodb";
-
-const app = express();
+import createApp from "./app";
 
 MongoClient.connect(DB_URL, (err, client) => {
     if (err) throw err;
@@ -19,10 +17,6 @@ MongoClient.connect(DB_URL, (err, client) => {
         console.log(err)
     });
 
-    app.get("/", (req, res) => {
-        res.send("Hello world!");
-    });
-
-    app.listen(PORT);
+    createApp().listen(PORT);
 });
 
