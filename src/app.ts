@@ -6,6 +6,7 @@ import { join } from "path";
 import user from "./user";
 import admin from "./admin";
 import nonMatch from "./common/controllers/nonMatch"
+import handleError from "./common/controllers/handleError";
 
 export default function createApp() {
     const app = express();
@@ -13,7 +14,9 @@ export default function createApp() {
 
     app.use(express.static(join(__dirname, "../static")));
     express.json();
-    express.urlencoded();
+    express.urlencoded({
+        extended: true
+    });
     express.text();
     app.use(
         session({
@@ -21,6 +24,7 @@ export default function createApp() {
             secret: "blog",
             rolling: true,
             resave: false,
+            saveUninitialized: false,
             cookie: {
                 httpOnly: true,
                 maxAge: 30 * 60 * 1000
@@ -28,9 +32,10 @@ export default function createApp() {
         })
     );
 
-    app.use("/", user);
-    app.use("/admin", admin);
+    app.use("/api", user);
+    app.use("/api/admin", admin);
     app.use(nonMatch);
+    app.use(handleError);
 
     return app;
 }

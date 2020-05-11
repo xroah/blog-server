@@ -1,4 +1,4 @@
-export const PORT = 3000;
+export const PORT = 8000;
 export const DB_USER = "";
 export const DB_PWD = "";
 export const DB_NAME = "blog";

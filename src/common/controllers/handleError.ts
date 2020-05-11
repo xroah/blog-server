@@ -5,7 +5,8 @@ import {
 } from "express";
 import responseError from "../responseError";
 
-export default function nonMatch(
+export default function handleError(
+    err: any,
     req: Request,
     res: Response,
     next: NextFunction
@@ -14,8 +15,8 @@ export default function nonMatch(
         req,
         res,
         next,
-        404,
-        "对不起,您访问的资源不存在!",
-        "404.html"
+        500,
+        err.message || "服务器错误！",
+        "500.html"
     );
 }

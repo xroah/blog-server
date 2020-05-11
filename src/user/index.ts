@@ -1,5 +1,4 @@
 import express from "express";
-import nonMatch from "../common/controllers/nonMatch";
 
 const app = express();
 
