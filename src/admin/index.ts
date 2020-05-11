@@ -5,6 +5,6 @@ import nonMatch from "../common/controllers/nonMatch"
 const app = express();
 
 app.all("*", interceptor);
-app.use(nonMatch);
+// app.use(nonMatch);
 
 export default app;

@@ -7,6 +7,4 @@ app.get("/", (req, res) => {
     res.send("Hello world!");
 });
 
-app.use(nonMatch);
-
 export default app;

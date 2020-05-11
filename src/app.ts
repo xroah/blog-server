@@ -5,6 +5,7 @@ import store from "connect-redis";
 import { join } from "path";
 import user from "./user";
 import admin from "./admin";
+import nonMatch from "./common/controllers/nonMatch"
 
 export default function createApp() {
     const app = express();
@@ -29,6 +30,7 @@ export default function createApp() {
 
     app.use("/", user);
     app.use("/admin", admin);
+    app.use(nonMatch);
 
     return app;
 }
