@@ -10,18 +10,23 @@ export default function interceptor(
     res: Response,
     next: NextFunction
 ) {
-    const session = req.session || { role: null };
-
-    if (session.role !== "admin") {
-        return responseError(
-            req,
-            res,
-            next,
-            403,
-            "对不起，您没有访问权限！",
-            "403.html"
-        );
+    const session = req.session || { role: null, username: null };
+    
+    if (session.role === "admin" ||
+        (
+            req.method.toLowerCase() === "post" &&
+            /\/login\/?/.test(req.url)
+        )
+    ) {
+        return next();
     }
 
-    next();
+    responseError(
+        req,
+        res,
+        next,
+        403,
+        "对不起，您没有访问权限！",
+        "403.html"
+    );
 }

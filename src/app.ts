@@ -7,18 +7,17 @@ import user from "./public";
 import admin from "./admin";
 import nonMatch from "./common/controllers/nonMatch"
 import handleError from "./common/controllers/handleError";
-import log4js from "log4js";
 
 export default function createApp() {
     const app = express();
     const RedisStore = store(session);
     
     app.use(express.static(join(__dirname, "../static")));
-    express.json();
-    express.urlencoded({
+    app.use(express.json());
+    app.use(express.urlencoded({
         extended: true
-    });
-    express.text();
+    }));
+    app.use(express.text());
     app.use(
         session({
             store: new RedisStore({ client: redis.createClient() }),
