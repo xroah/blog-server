@@ -3,15 +3,16 @@ import session from "express-session";
 import redis from "redis";
 import store from "connect-redis";
 import { join } from "path";
-import user from "./user";
+import user from "./public";
 import admin from "./admin";
 import nonMatch from "./common/controllers/nonMatch"
 import handleError from "./common/controllers/handleError";
+import log4js from "log4js";
 
 export default function createApp() {
     const app = express();
     const RedisStore = store(session);
-
+    
     app.use(express.static(join(__dirname, "../static")));
     express.json();
     express.urlencoded({
@@ -31,7 +32,6 @@ export default function createApp() {
             }
         })
     );
-
     app.use("/api", user);
     app.use("/api/admin", admin);
     app.use(nonMatch);
