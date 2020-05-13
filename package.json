@@ -4,7 +4,8 @@
   "description": "blog backend",
   "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./startDev"
   },
   "repository": {
     "type": "git",
