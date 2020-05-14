@@ -31,12 +31,15 @@ export default function fetchBingPic(
 
                 response.on("data", chunk => ret += chunk);
                 response.on("end", () => {
-                    const info:any = JSON.parse(ret) || {};
+                    const info: any = JSON.parse(ret) || {};
                     const img = info.images[0] || {};
 
                     res.json({
-                        url: `https://${hostname}${img.url}`,
-                        copyright: img.copyright
+                        code: 0,
+                        data: {
+                            url: `https://${hostname}${img.url}`,
+                            copyright: img.copyright
+                        }
                     });
                 });
             }
