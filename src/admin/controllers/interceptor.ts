@@ -10,9 +10,16 @@ export default function interceptor(
     res: Response,
     next: NextFunction
 ) {
-    const session = req.session || { role: null, username: null };
-    
-    if (session.role === "admin" ||
+    const session: any = req.session || {};
+    const auth = req.get("authorization") || "";
+    const token = auth.split(" ");
+
+    if (
+        (
+            session.role === "admin" &&
+            token[0] === "token" &&
+            token[1] === session.token
+        ) ||
         (
             req.method.toLowerCase() === "post" &&
             /\/login\/?/.test(req.url)

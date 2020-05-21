@@ -49,6 +49,7 @@ export function login(
             }
 
             const session = req.session || {} as any;
+            const token = session.token = md5(`${ret.role}${username}${Math.random()}`);
 
             session.role = ret.role;
             session.username = username;
@@ -56,7 +57,10 @@ export function login(
             return res.json({
                 code: 0,
                 msg: "登录成功!",
-                data: ret
+                data: {
+                    ...ret,
+                    token
+                }
             });
         }).catch(next);
 }
