@@ -11,6 +11,8 @@ export default function handleError(
     res: Response,
     next: NextFunction
 ) {
+    console.log(err);
+
     responseError(
         req,
         res,

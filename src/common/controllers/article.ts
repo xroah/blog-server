@@ -5,10 +5,10 @@ import {
 } from "express";
 import nonMatch from "./nonMatch";
 import { ObjectID } from "mongodb";
-import { findOne } from "../../db";
+import { findOne, find } from "../../db";
 import { ARTICLES } from "../../db/collections";
 
-async function queryArticleById(
+async function queryById(
     req: Request,
     res: Response,
     next: NextFunction
@@ -58,12 +58,62 @@ async function queryArticleById(
     })
 }
 
+async function queryByCondition(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const isAdmin = (req.session as any).role === "admin";
+    const {
+        after,
+        prev,
+        pageSize
+    } = req.query;
+    let _pageSize = Number(pageSize) || 10;
+    let ret;
+    const filter: any = {};
+
+    if (!isAdmin) {
+        filter.secret = {
+            $not: {
+                $eq: true
+            }
+        };
+    }
+
+    try {
+        if (after) {
+            filter._id = {
+                $lt: new ObjectID(after as any)
+            };
+        } else if (prev) {
+            filter._id = {
+                $gt: new ObjectID(prev as any)
+            };
+        }
+
+        ret = await find(ARTICLES, filter)
+            .sort({ _id: -1 })
+            .limit(_pageSize)
+            .toArray();
+    } catch (error) {
+        return next(error);
+    }
+
+    res.json({
+        code: 0,
+        data: ret
+    });
+}
+
 export function queryArticle(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
     if (req.query.articleId !== undefined) {
-        return queryArticleById(req, res, next);
+        return queryById(req, res, next);
     }
+
+    queryByCondition(req, res, next);
 }

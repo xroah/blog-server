@@ -3,9 +3,17 @@ import {
     Response,
     NextFunction
 } from "express";
-import { findOneAndUpdate, updateMany } from "../../db";
+import {
+    find,
+    findOneAndUpdate,
+    updateMany,
+    findOneAndDelete,
+    deleteMany
+} from "../../db";
 import { ARTICLES, IMAGES } from "../../db/collections";
 import { ObjectID } from "mongodb";
+import { unlink } from "fs";
+import promisify from "../../common/utils/promisify";
 
 function updateImage(images: Array<any>, articleId: ObjectID) {
     return updateMany(
@@ -89,4 +97,53 @@ export async function saveArticle(
             msg: "保存失败"
         });
     }
+}
+
+async function deleteImages(articleId: ObjectID) {
+    let ret;
+
+    try {
+        ret = await find(IMAGES, { articleId }).toArray();
+
+        if (ret.length) {
+            for (let img of ret) {
+                promisify(unlink)(`${process.env.HOME}/${img.path}`);
+            }
+        }
+
+        deleteMany(IMAGES, { articleId });
+    } catch (error) {
+
+    }
+}
+
+export async function deleteArticle(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const { articleId } = req.body;
+    let ret;
+
+    try {
+        if (!articleId) {
+            throw new Error("没有传articleId");
+        }
+
+        const _id = new ObjectID(articleId);
+        ret = await findOneAndDelete(ARTICLES, { _id });
+
+        deleteImages(_id);
+    } catch (error) {
+        return next(error);
+    }
+
+    if (ret.ok) {
+        return res.json({ code: 0 });
+    }
+
+    res.json({
+        code: 1,
+        msg: "删除失败"
+    });
 }
