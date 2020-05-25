@@ -64,6 +64,8 @@ export async function saveArticle(
             update.modifyTime = new Date();
         } else {
             update.createTime = new Date();
+            update.todayViewed = 0;
+            update.totalViewed = 0;
         }
 
         ret = await findOneAndUpdate(
