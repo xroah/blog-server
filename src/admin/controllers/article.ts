@@ -123,13 +123,14 @@ export async function deleteArticle(
     next: NextFunction
 ) {
     const { articleId } = req.body;
+    console.log(typeof req.body)
     let ret;
 
     try {
         if (!articleId) {
             throw new Error("没有传articleId");
         }
-
+        
         const _id = new ObjectID(articleId);
         ret = await findOneAndDelete(ARTICLES, { _id });
 

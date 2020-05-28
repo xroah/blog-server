@@ -2,7 +2,7 @@ import express from "express";
 import interceptor from "./controllers/interceptor";
 import { login, logout } from "./controllers/login";
 import upload from "./controllers/upload";
-import { saveArticle } from "./controllers/article";
+import { saveArticle, deleteArticle } from "./controllers/article";
 import {queryArticle} from "../common/controllers/article";
 
 const app = express();
@@ -13,6 +13,7 @@ app.post("/logout", logout);
 app.post("/upload", upload);
 app.route("/article")
     .post(saveArticle)
-    .get(queryArticle);
+    .get(queryArticle)
+    .delete(deleteArticle);
 
 export default app;

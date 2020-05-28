@@ -92,7 +92,15 @@ async function queryByCondition(
             };
         }
 
-        ret = await find(ARTICLES, filter)
+        ret = await find(
+            ARTICLES,
+            filter,
+            {
+                projection: {
+                    content: 0
+                }
+            }
+        )
             .sort({ _id: -1 })
             .limit(_pageSize)
             .toArray();
