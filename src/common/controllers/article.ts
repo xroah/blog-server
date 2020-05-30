@@ -39,7 +39,6 @@ async function queryById(
                 projection: {
                     _id: 0,
                     summary: 0,
-                    createTime: 0,
                     modifyTime: 0
                 }
             }
