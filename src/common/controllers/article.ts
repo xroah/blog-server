@@ -5,7 +5,7 @@ import {
 } from "express";
 import nonMatch from "./nonMatch";
 import { ObjectID } from "mongodb";
-import { findOne, find } from "../../db";
+import { findOne, db, find } from "../../db";
 import { ARTICLES } from "../../db/collections";
 
 async function queryById(
@@ -65,13 +65,19 @@ async function queryByCondition(
 ) {
     const isAdmin = (req.session as any).role === "admin";
     const {
-        after,
-        prev,
+        page,
         pageSize
     } = req.query;
     let _pageSize = Number(pageSize) || 10;
-    let ret;
     const filter: any = {};
+    const projection = {
+        projection: {
+            content: 0
+        }
+    };
+    let _page = Number(page) || 1;
+    let ret;
+    let count;
 
     if (!isAdmin) {
         filter.secret = {
@@ -82,35 +88,26 @@ async function queryByCondition(
     }
 
     try {
-        if (after) {
-            filter._id = {
-                $lt: new ObjectID(after as any)
-            };
-        } else if (prev) {
-            filter._id = {
-                $gt: new ObjectID(prev as any)
-            };
-        }
-
+        count = await db.collection(ARTICLES).countDocuments(filter);
         ret = await find(
             ARTICLES,
             filter,
-            {
-                projection: {
-                    content: 0
-                }
-            }
+            projection
         )
-            .sort({ _id: -1 })
-            .limit(_pageSize)
-            .toArray();
+        .sort({_id: -1})
+        .skip((_page - 1) * _pageSize)
+        .limit(_pageSize)
+        .toArray();
     } catch (error) {
         return next(error);
     }
 
     res.json({
         code: 0,
-        data: ret
+        data: {
+            total: count,
+            list: ret
+        }
     });
 }
 
