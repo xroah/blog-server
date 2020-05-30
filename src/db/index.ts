@@ -3,12 +3,12 @@ import {
     DB_URL
 } from "../config";
 import {
-    MongoClient, 
+    MongoClient,
     Db,
     FindOneOptions,
-    UpdateOneOptions, 
+    UpdateOneOptions,
     CollectionInsertOneOptions,
-    FindOneAndUpdateOption, 
+    FindOneAndUpdateOption,
     UpdateManyOptions,
     FindOneAndDeleteOption,
     CommonOptions
@@ -60,3 +60,5 @@ export function insertOne(collection: string, doc: object, options?: CollectionI
 export function deleteMany(collection: string, filter: object, options?: CommonOptions) {
     return db.collection(collection).deleteMany(filter, options);
 }
+
+export { db }
