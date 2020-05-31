@@ -5,8 +5,8 @@ import {
 } from "express";
 import nonMatch from "./nonMatch";
 import { ObjectID } from "mongodb";
-import { findOne, db, find } from "../../db";
-import { ARTICLES } from "../../db/collections";
+import { db, find } from "../../db";
+import { ARTICLES, CATEGORIES } from "../../db/collections";
 
 async function queryById(
     req: Request,
@@ -32,17 +32,37 @@ async function queryById(
             }
         }
 
-        ret = await findOne(
-            ARTICLES,
-            filter,
-            {
-                projection: {
-                    _id: 0,
-                    summary: 0,
-                    modifyTime: 0
+        ret = await db.collection(ARTICLES)
+            .aggregate([
+                {
+                    $lookup: {
+                        from: CATEGORIES,
+                        localField: "categoryId",
+                        foreignField: "_id",
+                        as: "category"
+                    }
+                },
+                {
+                    $set: {
+                        category: {
+                            $arrayElemAt: ["$category", 0]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        categoryName: "$category.name"
+                    }
+                },
+                {
+                    $project: {
+                        summary: 0,
+                        category: 0,
+                        modifyTime: 0
+                    }
                 }
-            }
-        );
+            ]).toArray();
+        ret = ret[0];
     } catch (error) {
         return next(error);
     }
@@ -93,10 +113,10 @@ async function queryByCondition(
             filter,
             projection
         )
-        .sort({_id: -1})
-        .skip((_page - 1) * _pageSize)
-        .limit(_pageSize)
-        .toArray();
+            .sort({ _id: -1 })
+            .skip((_page - 1) * _pageSize)
+            .limit(_pageSize)
+            .toArray();
     } catch (error) {
         return next(error);
     }
@@ -120,4 +140,49 @@ export function queryArticle(
     }
 
     queryByCondition(req, res, next);
+}
+
+export async function queryPrevAndAfter(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const { articleId } = req.query;
+    const ret: any = {};
+
+    try {
+        const _id = new ObjectID(articleId as any);
+        const next = await find(
+            ARTICLES,
+            {
+                _id: {
+                    $lt: _id
+                }
+            }
+        )
+            .sort({ _id: -1 }).
+            limit(1)
+            .toArray();
+        const prev = await find(
+            ARTICLES,
+            {
+                _id: {
+                    $gt: _id
+                }
+            }
+        )
+        .sort({_id: 1})
+        .limit(1)
+        .toArray();
+
+        ret.prev = prev[0];
+        ret.next = next[0];
+    } catch (error) {
+        return next(error);
+    }
+
+    res.json({
+        code: 0,
+        data: ret
+    });
 }

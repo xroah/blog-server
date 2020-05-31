@@ -1,6 +1,6 @@
-import express, { query } from "express";
+import express from "express";
 import fetchBingPic from "./controllers/fetchBingPic";
-import { queryArticle } from "../common/controllers/article";
+import { queryArticle, queryPrevAndAfter } from "../common/controllers/article";
 
 const app = express();
 
@@ -9,5 +9,6 @@ app.get("/", (req, res) => {
 });
 app.get("/bg", fetchBingPic);
 app.get("/articles", queryArticle);
+app.get("/prevAndNextArticle", queryPrevAndAfter)
 
 export default app;
