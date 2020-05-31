@@ -3,7 +3,12 @@ import interceptor from "./controllers/interceptor";
 import { login, logout } from "./controllers/login";
 import upload from "./controllers/upload";
 import { saveArticle, deleteArticle } from "./controllers/article";
-import {queryArticle} from "../common/controllers/article";
+import { queryArticle } from "../common/controllers/article";
+import {
+    saveCategory,
+    delCategory,
+    queryCategory
+} from "./controllers/category";
 
 const app = express();
 
@@ -15,5 +20,9 @@ app.route("/article")
     .post(saveArticle)
     .get(queryArticle)
     .delete(deleteArticle);
+app.route("/category")
+    .post(saveCategory)
+    .delete(delCategory)
+    .get(queryCategory)
 
 export default app;
