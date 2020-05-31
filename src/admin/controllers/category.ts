@@ -54,7 +54,7 @@ export async function saveCategory(
         return next(error);
     }
 
-    if (ret.ok) {
+    if (ret.value) {
         return res.json({ code: 0 })
     }
 
@@ -87,7 +87,7 @@ export async function delCategory(
         return next(error);
     }
 
-    if (ret.ok) {
+    if (ret.value) {
         return res.json({ code: 0 });
     }
 

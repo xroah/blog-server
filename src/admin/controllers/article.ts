@@ -86,7 +86,7 @@ export async function saveArticle(
         return next(error);
     }
 
-    if (ret.ok) {
+    if (ret.value) {
         res.json({
             code: 0,
             msg: "保存成功"
@@ -123,7 +123,6 @@ export async function deleteArticle(
     next: NextFunction
 ) {
     const { articleId } = req.body;
-    console.log(typeof req.body)
     let ret;
 
     try {
@@ -139,7 +138,7 @@ export async function deleteArticle(
         return next(error);
     }
 
-    if (ret.ok) {
+    if (ret.value) {
         return res.json({ code: 0 });
     }
 

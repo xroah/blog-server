@@ -3,7 +3,7 @@ import {
     Response,
     NextFunction
 } from "express";
-import { findOne } from "../../db";
+import { findOne, findOneAndUpdate } from "../../db";
 import { createHash } from "crypto";
 
 function md5(str: string) {
@@ -79,5 +79,44 @@ export function logout(
             code: 0,
             msg: "退出成功"
         });
+    });
+}
+
+export async function updatePassword(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const {
+        origPwd,
+        newPwd
+    } = req.body;
+    const { username } = req.session as any;
+    let ret;
+
+    try {
+        ret = await findOneAndUpdate(
+            "users",
+            {
+                username,
+                password: md5(origPwd)
+            },
+            {
+                $set: {
+                    password: md5(newPwd)
+                }
+            }
+        );
+    } catch (error) {
+        return next(error);
+    }
+
+    if (ret.value) {
+        return res.json({code: 0});
+    }
+
+    res.json({
+        code: 1,
+        msg: "原密码不正确"
     });
 }
