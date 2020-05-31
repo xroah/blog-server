@@ -35,6 +35,9 @@ async function queryById(
         ret = await db.collection(ARTICLES)
             .aggregate([
                 {
+                    $match: filter
+                },
+                {
                     $lookup: {
                         from: CATEGORIES,
                         localField: "categoryId",
