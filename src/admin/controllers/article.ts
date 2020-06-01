@@ -85,18 +85,11 @@ export async function saveArticle(
     } catch (error) {
         return next(error);
     }
-
-    if (ret.value) {
-        res.json({
-            code: 0,
-            msg: "保存成功"
-        });
-    } else {
-        res.json({
-            code: 1,
-            msg: "保存失败"
-        });
-    }
+    
+    res.json({
+        code: 0,
+        msg: "保存成功"
+    });
 }
 
 async function deleteImages(articleId: ObjectID) {
@@ -129,7 +122,7 @@ export async function deleteArticle(
         if (!articleId) {
             throw new Error("没有传articleId");
         }
-        
+
         const _id = new ObjectID(articleId);
         ret = await findOneAndDelete(ARTICLES, { _id });
 

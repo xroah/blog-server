@@ -36,7 +36,7 @@ export async function saveCategory(
         };
 
         if (!isEdit) {
-            const exist = findOne(CATEGORIES, { name: categoryName });
+            const exist = await findOne(CATEGORIES, { name: categoryName });
             data.createTime = new Date();
 
             if (exist) {
@@ -54,14 +54,7 @@ export async function saveCategory(
         return next(error);
     }
 
-    if (ret.value) {
-        return res.json({ code: 0 })
-    }
-
-    res.json({
-        code: 1,
-        msg: "保存失败!"
-    });
+    res.json({ code: 0 });
 }
 
 export async function delCategory(
