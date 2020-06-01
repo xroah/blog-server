@@ -109,16 +109,25 @@ export async function queryCategory(
                     {
                         $lookup: {
                             from: "articles",
-                            localField: "_id",
-                            foreignField: "categoryId",
+                            let: {cId: "$_id"},
+                            pipeline: [{
+                                $match: {
+                                    $expr: {
+                                        $eq: ["$$cId", "$categoryId"]
+                                    }
+                                }
+                            }, {
+                                $count: "count"
+                            }],
                             as: "articles"
                         }
                     },
                     {
+                        $unwind: "$articles"
+                    },
+                    {
                         $addFields: {
-                            articleCount: {
-                                $size: "$articles"
-                            }
+                            articleCount: "$articles.count"
                         }
                     },
                     {
