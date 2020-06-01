@@ -15,6 +15,7 @@ import { ObjectID } from "mongodb";
 import { unlink } from "fs";
 import promisify from "../../common/utils/promisify";
 
+//link to article, for deleting the image if the article does not exist
 function updateImage(images: Array<any>, articleId: ObjectID) {
     return updateMany(
         IMAGES,
@@ -37,8 +38,6 @@ export async function saveArticle(
     res: Response,
     next: NextFunction
 ) {
-
-    let ret;
     let {
         articleId,
         content,
@@ -47,6 +46,7 @@ export async function saveArticle(
         categoryId,
         tag = "",
         secret = false,
+        draft = false,
         images = []
     } = req.body;
     const isUpdate = !!articleId;
@@ -56,11 +56,13 @@ export async function saveArticle(
         title,
         tag: tag.split(/;；/g),
         secret,
+        draft,
         modifyTime: new Date()
     };
+    let _id;
 
     try {
-        let _id = new ObjectID(articleId);
+        _id = new ObjectID(articleId || undefined);
         categoryId = new ObjectID(categoryId);
         update.categoryId = categoryId;
 
@@ -76,7 +78,7 @@ export async function saveArticle(
             update.totalViewed = 0;
         }
 
-        ret = await findOneAndUpdate(
+        await findOneAndUpdate(
             ARTICLES,
             { _id },
             { $set: update },
@@ -85,10 +87,12 @@ export async function saveArticle(
     } catch (error) {
         return next(error);
     }
-    
-    res.json({
+
+    res.json({ 
         code: 0,
-        msg: "保存成功"
+        data: {
+            _id
+        }
     });
 }
 

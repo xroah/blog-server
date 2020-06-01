@@ -7,6 +7,7 @@ import nonMatch from "./nonMatch";
 import { ObjectID } from "mongodb";
 import { db, find } from "../../db";
 import { ARTICLES, CATEGORIES } from "../../db/collections";
+import isAdmin from "../utils/isAdmin";
 
 async function queryById(
     req: Request,
@@ -15,7 +16,7 @@ async function queryById(
 ) {
     const { articleId } = req.query;
 
-    const isAdmin = (req.session as any).role === "admin";
+    const admin = isAdmin(req);
     let ret;
 
     try {
@@ -24,7 +25,7 @@ async function queryById(
             _id
         };
 
-        if (!isAdmin) {
+        if (!admin) {
             filter.secret = {
                 $not: {
                     $eq: true
@@ -85,36 +86,64 @@ async function queryByCondition(
     res: Response,
     next: NextFunction
 ) {
-    const isAdmin = (req.session as any).role === "admin";
+    const admin = isAdmin(req);
     const {
         page,
-        pageSize
+        pageSize,
+        secret,
+        draft,
+        categoryId
     } = req.query;
     let _pageSize = Number(pageSize) || 10;
     const filter: any = {};
-    const projection = {
+    const options: any = {
         projection: {
-            content: 0
+            content: 0,
+            secret: 0
+        }
+    };
+    const nonSecret = {
+        $not: {
+            $eq: true
+        }
+    };
+    const nonDraft = {
+        $not: {
+            $eq: true
         }
     };
     let _page = Number(page) || 1;
     let ret;
     let count;
+    
+    if (!admin) {
+        filter.secret = nonSecret;
+        filter.draft = nonDraft;
+        options.projection.draft = 0;
+    } else {
+        if (secret === "true") {
+            filter.secret = { $eq: true };
+        } else if (secret === "false") {
+            filter.secret = nonSecret;
+        }
 
-    if (!isAdmin) {
-        filter.secret = {
-            $not: {
-                $eq: true
-            }
-        };
+        if (draft === "true") {
+            filter.draft = { $eq: true };
+        } else if (draft === "false") {
+            filter.draft = nonDraft;
+        }
     }
 
     try {
-        count = await db.collection(ARTICLES).countDocuments(filter);
+        if (categoryId) {
+            filter.categoryId = new ObjectID(categoryId as any);
+        }
+
+        count = await db.collection(ARTICLES).countDocuments(filter, {});
         ret = await find(
             ARTICLES,
             filter,
-            projection
+            options
         )
             .sort({ _id: -1 })
             .skip((_page - 1) * _pageSize)
@@ -163,8 +192,8 @@ export async function queryPrevAndAfter(
                 }
             }
         )
-            .sort({ _id: -1 }).
-            limit(1)
+            .sort({ _id: -1 })
+            .limit(1)
             .toArray();
         const prev = await find(
             ARTICLES,
@@ -174,9 +203,9 @@ export async function queryPrevAndAfter(
                 }
             }
         )
-        .sort({_id: 1})
-        .limit(1)
-        .toArray();
+            .sort({ _id: 1 })
+            .limit(1)
+            .toArray();
 
         ret.prev = prev[0];
         ret.next = next[0];
