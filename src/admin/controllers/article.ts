@@ -76,6 +76,7 @@ export async function saveArticle(
             update.createTime = new Date();
             update.todayViewed = 0;
             update.totalViewed = 0;
+            update.authorId = req.session!.userId;
         }
 
         await findOneAndUpdate(
