@@ -37,7 +37,7 @@ export function login(
         },
         {
             projection: {
-                _id: 0,
+                createTime: 0,
                 password: 0
             }
         }).then(ret => {
@@ -48,11 +48,12 @@ export function login(
                 });
             }
 
-            const session = req.session || {} as any;
+            const session = req.session!;
             const token = session.token = md5(`${ret.role}${username}${Math.random()}`);
 
             session.role = ret.role;
             session.username = username;
+            session.userId = ret._id;
 
             return res.json({
                 code: 0,
