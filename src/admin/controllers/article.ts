@@ -63,7 +63,14 @@ export async function saveArticle(
 
     try {
         _id = new ObjectID(articleId || undefined);
-        categoryId = new ObjectID(categoryId);
+        if (!draft) {
+            if (!categoryId) {
+                throw new Error("没有categoryId");
+            }
+
+            categoryId = new ObjectID(categoryId);
+        }
+        
         update.categoryId = categoryId;
 
         if (images.length) {
