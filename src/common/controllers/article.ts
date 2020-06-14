@@ -115,7 +115,7 @@ async function queryByCondition(
     let _page = Number(page) || 1;
     let ret;
     let count;
-    
+
     if (!admin) {
         filter.secret = nonSecret;
         filter.draft = nonDraft;
@@ -180,32 +180,53 @@ export async function queryPrevAndAfter(
     next: NextFunction
 ) {
     const { articleId } = req.query;
+    const admin = isAdmin(req);
     const ret: any = {};
+    let filter: any = {};
+    const _find = (filter: any, sort: number) => {
+        return find(ARTICLES, filter)
+            .sort({ _id: sort })
+            .limit(1)
+            .project({ _id: 1 })
+            .toArray();
+    }
 
     try {
         const _id = new ObjectID(articleId as any);
-        const next = await find(
-            ARTICLES,
+
+        if (!admin) {
+            filter = {
+                secret: {
+                    $not: {
+                        $eq: true
+                    }
+                },
+                draft: {
+                    $not: {
+                        $eq: true
+                    }
+                }
+            };
+        }
+
+        const next = await _find(
             {
+                ...filter,
                 _id: {
                     $lt: _id
                 }
-            }
+            },
+            -1
         )
-            .sort({ _id: -1 })
-            .limit(1)
-            .toArray();
-        const prev = await find(
-            ARTICLES,
+        const prev = await _find(
             {
+                ...filter,
                 _id: {
                     $gt: _id
                 }
-            }
+            },
+            1
         )
-            .sort({ _id: 1 })
-            .limit(1)
-            .toArray();
 
         ret.prev = prev[0];
         ret.next = next[0];
