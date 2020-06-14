@@ -16,7 +16,7 @@ import {
 
 let db: Db;
 
-export function connectDb(callback: () => void) {
+export function connectDb(callback: (db: Db, client: MongoClient) => void) {
     MongoClient.connect(
         DB_URL,
         {
@@ -25,7 +25,7 @@ export function connectDb(callback: () => void) {
     ).then(client => {
         db = client.db(DB_NAME);
 
-        callback();
+        callback(db, client);
     }).catch(err => console.error(err));
 }
 

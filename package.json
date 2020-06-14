@@ -27,7 +27,9 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@types/cron": "^1.7.2",
     "connect-redis": "^4.0.4",
+    "cron": "^1.8.2",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "log4js": "^6.2.1",
