@@ -54,7 +54,7 @@ export async function saveArticle(
         content,
         summary,
         title,
-        tag: tag.split(/;；/g),
+        tag: tag.split(/;|；/g),
         secret,
         draft,
         modifyTime: new Date()
