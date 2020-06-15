@@ -6,7 +6,14 @@ function clearTodayViewed() {
     connectDb(async (db, client) => {
         try {
             await db.collection(ARTICLES)
-                .update({}, { todayViewed: 0 });
+                .updateMany(
+                    {},
+                    {
+                        $set: {
+                            todayViewed: 0
+                        }
+                    }
+                );
         } catch (error) {
 
         }
