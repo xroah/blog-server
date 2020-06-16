@@ -4,8 +4,8 @@ import {
     NextFunction
 } from "express";
 import { ObjectId } from "mongodb";
-import { insertOne, find, db } from "../../db";
-import { COMMENTS } from "../../db/collections";
+import { insertOne, findOne, db } from "../../db";
+import { COMMENTS, ARTICLES } from "../../db/collections";
 
 export async function saveComment(
     req: Request,
@@ -18,7 +18,7 @@ export async function saveComment(
         root = null,
         content = "",
         homePage = "",
-        authorName
+        userName
     } = req.body;
     const session = req.session!;
     const {
@@ -58,6 +58,22 @@ export async function saveComment(
         }
 
         const aId = new ObjectId(articleId);
+        const article = await findOne(
+            ARTICLES,
+            {
+                _id: articleId
+            },
+            {
+                projection: {
+                    authorId: 1
+                }
+            }
+        );
+
+        if (!article) {
+            throw new Error("文章不存在");
+        }
+
         let replyToId;
         let rootId;
 
@@ -77,9 +93,10 @@ export async function saveComment(
                 replyTo: replyToId,
                 content,
                 createTime: new Date,
-                authorId: req.session!.userId || null,
-                authorName: authorName ? String(authorName) : null,
-                homePage: homePage ? String(homePage) : null
+                userId: req.session!.userId || null,
+                userName: userName ? String(userName) : null,
+                homePage: homePage ? String(homePage) : null,
+                isAuthor: article.authorId === req.session!.userId
             }
         );
 

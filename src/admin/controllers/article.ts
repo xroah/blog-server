@@ -57,12 +57,14 @@ export async function saveArticle(
         tag: tag.split(/;|；/g),
         secret,
         draft,
-        modifyTime: new Date()
+        modifyTime: new Date(),
+        authorId: req.session!.userId
     };
     let _id;
 
     try {
         _id = new ObjectID(articleId || undefined);
+
         if (!draft) {
             if (!categoryId) {
                 throw new Error("没有categoryId");
@@ -83,7 +85,6 @@ export async function saveArticle(
             update.createTime = new Date();
             update.todayViewed = 0;
             update.totalViewed = 0;
-            update.authorId = req.session!.userId;
         }
 
         await findOneAndUpdate(
