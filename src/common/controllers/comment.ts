@@ -4,7 +4,7 @@ import {
     NextFunction
 } from "express";
 import { ObjectId } from "mongodb";
-import { insertOne, find } from "../../db";
+import { insertOne, find, db } from "../../db";
 import { COMMENTS } from "../../db/collections";
 
 export async function saveComment(
@@ -98,18 +98,37 @@ export async function queryCommentsByArticle(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.body;
+    const { articleId } = req.query;
     let ret;
 
     try {
-        const aId = new ObjectId(articleId);
+        const aId = new ObjectId(articleId as any);
 
-        ret = await find(
-            COMMENTS,
-            { articleId: aId }
-        )
-            .sort({ createTime: -1 })
-            .toArray();
+        ret = await db.collection(COMMENTS)
+            .aggregate([
+                {
+                    $match: {
+                        $and: [{
+                            articleId: aId
+                        }, {
+                            root: null
+                        }]
+                    }
+                },
+                {
+                    $sort: {
+                        createTime: -1
+                    }
+                },
+                {
+                    $lookup: {
+                        from: COMMENTS,
+                        localField: "_id",
+                        foreignField: "root",
+                        as: "children"
+                    }
+                }
+            ]).toArray();
     } catch (error) {
         return next(error);
     }
