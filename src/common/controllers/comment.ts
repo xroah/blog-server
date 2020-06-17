@@ -7,6 +7,22 @@ import { ObjectId } from "mongodb";
 import { insertOne, findOne, db } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
 
+async function findArticle(articleId: ObjectId) {
+    let article = await findOne(
+        ARTICLES,
+        {
+            _id: articleId
+        },
+        {
+            projection: {
+                authorId: 1
+            }
+        }
+    );
+
+    return article;
+}
+
 export async function saveComment(
     req: Request,
     res: Response,
@@ -17,89 +33,80 @@ export async function saveComment(
         replyTo = null,
         root = null,
         content = "",
-        homePage = "",
-        userName
+        homepage = "",
+        username
     } = req.body;
     const session = req.session!;
     const {
         lastSaveTime,
         saving
     } = session;
+    let result: any;
 
     //user can publish only one comment within 1 minute
     if (
         (lastSaveTime && Date.now() - lastSaveTime < 60 * 1000) ||
         saving
     ) {
-        return res.json({
-            code: 1,
-            msg: "您的操作过于频繁，请稍后重试"
-        });
+        return next(new Error("您的操作过于频繁，请稍候再试！"));
     }
 
     session.lastSaveTime = null;
-    session.saving = true;
+
+    if (!articleId) {
+        return next(new Error("没有articleId"));
+    }
+
+    if (!content) {
+        return next(new Error("没有评论内容"));
+    }
+
+    if (typeof content !== "string") {
+        return next(new Error("内容格式错误"));
+    }
+
+    if (content.length > 500) {
+        return next(new Error("内容超过字数限制，最多500个字符"));
+    }
 
     try {
-        if (!articleId) {
-            throw new Error("没有articleId");
-        }
-
-        if (!content) {
-            throw new Error("没有评论内容");
-        }
-
-        if (typeof content !== "string") {
-            throw new Error("内容格式错误");
-        }
-
-        if (content.length > 500) {
-            throw new Error("内容超过字数限制，最多500个字符");
-        }
-
         const aId = new ObjectId(articleId);
-        const article = await findOne(
-            ARTICLES,
-            {
-                _id: articleId
-            },
-            {
-                projection: {
-                    authorId: 1
-                }
-            }
-        );
+        const article = await findArticle(aId);
 
         if (!article) {
-            throw new Error("文章不存在");
+            return next(new Error("文章不存在"));
         }
 
         let replyToId;
         let rootId;
 
         if (replyTo) {
-            replyToId = new ObjectId(replyToId);
+            replyToId = new ObjectId(replyTo);
         }
 
         if (root) {
             rootId = new ObjectId(root);
         }
 
-        await insertOne(
+        session.saving = true;
+
+        result = {
+            root: rootId,
+            articleId: aId,
+            replyTo: replyToId,
+            content,
+            createTime: new Date,
+            userId: req.session!.userId || new ObjectId(),
+            username: username ? String(username) : null,
+            homePage: homepage ? String(homepage) : null,
+            isAuthor: article.authorId === req.session!.userId
+        };
+        const ret = await insertOne(
             COMMENTS,
-            {
-                root: rootId,
-                articleId: aId,
-                replyTo: replyToId,
-                content,
-                createTime: new Date,
-                userId: req.session!.userId || null,
-                userName: userName ? String(userName) : null,
-                homePage: homePage ? String(homePage) : null,
-                isAuthor: article.authorId === req.session!.userId
-            }
+            result
         );
 
+        result._id = ret.insertedId;
         session.lastSaveTime = Date.now();
     } catch (error) {
         return next(error);
@@ -107,7 +114,10 @@ export async function saveComment(
         session.saving = false;
     }
 
-    res.json({ code: 0 });
+    res.json({
+        code: 0,
+        data: result
+    });
 }
 
 export async function queryCommentsByArticle(
