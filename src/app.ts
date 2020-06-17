@@ -24,7 +24,7 @@ export default function createApp() {
             secret: "blog",
             rolling: true,
             resave: false,
-            saveUninitialized: false,
+            saveUninitialized: true,
             cookie: {
                 httpOnly: true,
                 maxAge: 30 * 60 * 1000

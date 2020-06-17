@@ -6,6 +6,12 @@ import {
 import { ObjectId } from "mongodb";
 import { insertOne, findOne, db } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
+import redis from "redis";
+import promisify from "../utils/promisify";
+
+const redisClient = redis.createClient();
+const redisGet = promisify(redisClient.get.bind(redisClient));
+const redisSet = promisify(redisClient.set.bind(redisClient));
 
 async function findArticle(articleId: ObjectId) {
     let article = await findOne(
@@ -36,22 +42,15 @@ export async function saveComment(
         homepage = "",
         username
     } = req.body;
-    const session = req.session!;
-    const {
-        lastSaveTime,
-        saving
-    } = session;
+    const { id } = req.session!;
     let result: any;
 
     //user can publish only one comment within 1 minute
-    if (
-        (lastSaveTime && Date.now() - lastSaveTime < 60 * 1000) ||
-        saving
-    ) {
-        return next(new Error("您的操作过于频繁，请稍候再试！"));
-    }
+    let saved = await redisGet(id);
 
-    session.lastSaveTime = null;
+    if (saved) {
+        return next(new Error("你的操作过于频繁，请稍后再试"));
+    }
 
     if (!articleId) {
         return next(new Error("没有articleId"));
@@ -88,8 +87,6 @@ export async function saveComment(
             rootId = new ObjectId(root);
         }
 
-        session.saving = true;
-
         result = {
             root: rootId,
             articleId: aId,
@@ -101,17 +98,19 @@ export async function saveComment(
             homePage: homepage ? String(homepage) : null,
             isAuthor: article.authorId === req.session!.userId
         };
+        
+        await redisSet(id, "saved");
+
         const ret = await insertOne(
             COMMENTS,
             result
         );
 
         result._id = ret.insertedId;
-        session.lastSaveTime = Date.now();
+        redisClient.expire(id, 60, () => {});
     } catch (error) {
+        redisClient.expire(id, 1, () => {});
         return next(error);
-    } finally {
-        session.saving = false;
     }
 
     res.json({
