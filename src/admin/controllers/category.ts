@@ -109,7 +109,7 @@ export async function queryCategory(
                     {
                         $lookup: {
                             from: "articles",
-                            let: {cId: "$_id"},
+                            let: { cId: "$_id" },
                             pipeline: [{
                                 $match: {
                                     $expr: {
@@ -123,10 +123,14 @@ export async function queryCategory(
                         }
                     },
                     {
-                        $unwind: "$articles"
+                        $set: {
+                            articles: {
+                                $arrayElemAt: ["$articles", 0]
+                            }
+                        }
                     },
                     {
-                        $addFields: {
+                        $set: {
                             articleCount: "$articles.count"
                         }
                     },

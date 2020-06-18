@@ -177,9 +177,13 @@ async function queryByCondition(
                     as: "comments"
                 }
             }, {
-                $unwind: "$comments"
+                $set: {
+                    comments: {
+                        $arrayElemAt: ["$comments", 0]
+                    }
+                }
             }, {
-                $addFields: {
+                $set: {
                     commentCount: "$comments.count"
                 }
             }, {
