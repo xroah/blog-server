@@ -6,7 +6,11 @@ import {
 import nonMatch from "./nonMatch";
 import { ObjectID } from "mongodb";
 import { db, find } from "../../db";
-import { ARTICLES, CATEGORIES } from "../../db/collections";
+import {
+    ARTICLES,
+    CATEGORIES,
+    COMMENTS
+} from "../../db/collections";
 import isAdmin from "../utils/isAdmin";
 
 async function queryById(
@@ -47,11 +51,7 @@ async function queryById(
                     }
                 },
                 {
-                    $set: {
-                        category: {
-                            $arrayElemAt: ["$category", 0]
-                        }
-                    }
+                    $unwind: "$category"
                 },
                 {
                     $addFields: {
@@ -95,7 +95,7 @@ async function queryByCondition(
         categoryId
     } = req.query;
     let _pageSize = Number(pageSize) || 10;
-    const filter: any = {};
+    const filter: any[] = [];
     const options: any = {
         projection: {
             content: 0,
@@ -103,13 +103,17 @@ async function queryByCondition(
         }
     };
     const nonSecret = {
-        $not: {
-            $eq: true
+        secret: {
+            $not: {
+                $eq: true
+            }
         }
     };
     const nonDraft = {
-        $not: {
-            $eq: true
+        draft: {
+            $not: {
+                $eq: true
+            }
         }
     };
     let _page = Number(page) || 1;
@@ -117,38 +121,72 @@ async function queryByCondition(
     let count;
 
     if (!admin) {
-        filter.secret = nonSecret;
-        filter.draft = nonDraft;
+        filter.push(nonDraft, nonSecret);
+
         options.projection.draft = 0;
     } else {
         if (secret === "true") {
-            filter.secret = { $eq: true };
+            filter.push({ secret: true });
         } else if (secret === "false") {
-            filter.secret = nonSecret;
+            filter.push(nonSecret);
         }
 
         if (draft === "true") {
-            filter.draft = { $eq: true };
+            filter.push({ draft: true });
         } else if (draft === "false") {
-            filter.draft = nonDraft;
+            filter.push(nonDraft);
         }
     }
 
     try {
         if (categoryId) {
-            filter.categoryId = new ObjectID(categoryId as any);
+            filter.push({
+                categoryId: new ObjectID(categoryId as any)
+            })
         }
 
-        count = await db.collection(ARTICLES).countDocuments(filter, {});
-        ret = await find(
-            ARTICLES,
-            filter,
-            options
-        )
-            .sort({ _id: -1 })
-            .skip((_page - 1) * _pageSize)
-            .limit(_pageSize)
-            .toArray();
+        const $match = filter.length ? {
+            $and: filter
+        } : {};
+
+        count = await db.collection(ARTICLES).countDocuments($match, {});
+        ret = await db.collection(ARTICLES)
+            .aggregate([{
+                $match
+            }, {
+                $skip: (_page - 1) * _pageSize
+            }, {
+                $limit: _pageSize
+            }, {
+                $sort: {
+                    _id: -1
+                }
+            }, {
+                $lookup: {
+                    from: COMMENTS,
+                    let: { aId: "$_id" },
+                    pipeline: [{
+                        $match: {
+                            $expr: {
+                                $eq: ["$$aId", "$articleId"]
+                            }
+                        }
+                    }, {
+                        $count: "count",
+                    }],
+                    as: "comments"
+                }
+            }, {
+                $unwind: "$comments"
+            }, {
+                $addFields: {
+                    commentCount: "$comments.count"
+                }
+            }, {
+                $project: {
+                    comments: 0
+                }
+            }]).toArray();
     } catch (error) {
         return next(error);
     }
