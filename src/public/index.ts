@@ -4,6 +4,7 @@ import { queryArticle, queryPrevAndAfter } from "../common/controllers/article";
 import updateArticleViewedCount from "./controllers/updateArticleViewedCount";
 import { saveComment, queryCommentsByArticle } from "../common/controllers/comment";
 import { saveFeedback } from "./controllers/feedback";
+import { queryCategory } from "../common/controllers/category";
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.route("/comment")
     .get(queryCommentsByArticle)
     .post(saveComment);
 app.post("/feedback", saveFeedback);
+app.get("/category", queryCategory);
 
 export default app;

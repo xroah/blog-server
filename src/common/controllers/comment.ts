@@ -97,7 +97,7 @@ export async function saveComment(
             createTime: new Date,
             userId: req.session!.userId || new ObjectId(),
             username: username ? String(username) : null,
-            homePage: homepage ? String(homepage) : null,
+            homepage: homepage ? String(homepage) : null,
             isAuthor: article.authorId === req.session!.userId
         };
 
