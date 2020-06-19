@@ -3,6 +3,7 @@ import fetchBingPic from "./controllers/fetchBingPic";
 import { queryArticle, queryPrevAndAfter } from "../common/controllers/article";
 import updateArticleViewedCount from "./controllers/updateArticleViewedCount";
 import { saveComment, queryCommentsByArticle } from "../common/controllers/comment";
+import { saveFeedback } from "./controllers/feedback";
 
 const app = express();
 
@@ -16,5 +17,6 @@ app.post("/updateArticleViewedCount", updateArticleViewedCount);
 app.route("/comment")
     .get(queryCommentsByArticle)
     .post(saveComment);
+app.post("/feedback", saveFeedback);
 
 export default app;

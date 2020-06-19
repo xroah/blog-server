@@ -14,10 +14,13 @@ import {
     FindOneAndDeleteOption,
     CommonOptions
 } from "mongodb";
+import promisify from "../common/utils/promisify";
 
 let db: Db;
 
 export const redisClient = redis.createClient();
+export const redisGet = promisify(redisClient.get.bind(redisClient));
+export const redisSet = promisify(redisClient.set.bind(redisClient));
 
 export function connectDb(callback: (db: Db, client: MongoClient) => void) {
     MongoClient.connect(

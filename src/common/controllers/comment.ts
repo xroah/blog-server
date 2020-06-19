@@ -8,13 +8,12 @@ import {
     insertOne,
     findOne,
     redisClient,
-    db
+    db,
+    redisGet,
+    redisSet
 } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
-import promisify from "../utils/promisify";
-
-const redisGet = promisify(redisClient.get.bind(redisClient));
-const redisSet = promisify(redisClient.set.bind(redisClient));
+import noop from "../utils/noop";
 
 async function findArticle(articleId: ObjectId) {
     let article = await findOne(
@@ -110,9 +109,9 @@ export async function saveComment(
         );
 
         result._id = ret.insertedId;
-        redisClient.expire(id, 60, () => { });
+        redisClient.expire(id, 60, noop);
     } catch (error) {
-        redisClient.expire(id, 1, () => { });
+        redisClient.del(id, noop);
         return next(error);
     }
 
