@@ -15,6 +15,8 @@ import { ObjectID } from "mongodb";
 import { unlink } from "fs";
 import promisify from "../../common/utils/promisify";
 
+export { queryArticle } from "../../common/controllers/article";
+
 //link to article, for deleting the image if the article does not exist
 function updateImage(images: Array<any>, articleId: ObjectID) {
     return updateMany(
@@ -26,7 +28,8 @@ function updateImage(images: Array<any>, articleId: ObjectID) {
         },
         {
             $set: {
-                articleId
+                relatedId: articleId,
+                type: "article image"
             }
         },
         { upsert: true }
@@ -72,7 +75,7 @@ export async function saveArticle(
 
             categoryId = new ObjectID(categoryId);
         }
-        
+
         update.categoryId = categoryId;
 
         if (images.length) {
@@ -97,7 +100,7 @@ export async function saveArticle(
         return next(error);
     }
 
-    res.json({ 
+    res.json({
         code: 0,
         data: {
             _id
@@ -109,7 +112,7 @@ async function deleteImages(articleId: ObjectID) {
     let ret;
 
     try {
-        ret = await find(IMAGES, { articleId }).toArray();
+        ret = await find(IMAGES, { relatedId: articleId }).toArray();
 
         if (ret.length) {
             for (let img of ret) {

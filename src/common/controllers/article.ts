@@ -47,21 +47,24 @@ async function queryById(
                         from: CATEGORIES,
                         localField: "categoryId",
                         foreignField: "_id",
-                        as: "category"
+                        as: "categoryName"
                     }
                 },
                 {
-                    $unwind: "$category"
+                    $set: {
+                        categoryName: {
+                            $arrayElemAt: ["$categoryName", 0]
+                        }
+                    }
                 },
                 {
-                    $addFields: {
-                        categoryName: "$category.name"
+                    $set: {
+                        categoryName: "$categoryName.name"
                     }
                 },
                 {
                     $project: {
                         summary: 0,
-                        category: 0,
                         modifyTime: 0
                     }
                 }
@@ -154,13 +157,13 @@ async function queryByCondition(
             .aggregate([{
                 $match
             }, {
-                $skip: (_page - 1) * _pageSize
-            }, {
-                $limit: _pageSize
-            }, {
                 $sort: {
                     _id: -1
                 }
+            }, {
+                $skip: (_page - 1) * _pageSize
+            }, {
+                $limit: _pageSize
             }, {
                 $lookup: {
                     from: COMMENTS,
