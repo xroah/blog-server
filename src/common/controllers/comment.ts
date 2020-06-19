@@ -4,12 +4,15 @@ import {
     NextFunction
 } from "express";
 import { ObjectId } from "mongodb";
-import { insertOne, findOne, db } from "../../db";
+import {
+    insertOne,
+    findOne,
+    redisClient,
+    db
+} from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
-import redis from "redis";
 import promisify from "../utils/promisify";
 
-const redisClient = redis.createClient();
 const redisGet = promisify(redisClient.get.bind(redisClient));
 const redisSet = promisify(redisClient.set.bind(redisClient));
 
@@ -98,7 +101,7 @@ export async function saveComment(
             homePage: homepage ? String(homepage) : null,
             isAuthor: article.authorId === req.session!.userId
         };
-        
+
         await redisSet(id, "saved");
 
         const ret = await insertOne(
@@ -107,9 +110,9 @@ export async function saveComment(
         );
 
         result._id = ret.insertedId;
-        redisClient.expire(id, 60, () => {});
+        redisClient.expire(id, 60, () => { });
     } catch (error) {
-        redisClient.expire(id, 1, () => {});
+        redisClient.expire(id, 1, () => { });
         return next(error);
     }
 

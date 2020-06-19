@@ -142,7 +142,7 @@ async function queryByCondition(
         if (categoryId) {
             filter.push({
                 categoryId: new ObjectID(categoryId as any)
-            })
+            });
         }
 
         const $match = filter.length ? {
@@ -259,7 +259,7 @@ export async function queryPrevAndAfter(
                 }
             },
             -1
-        )
+        );
         const prev = await _find(
             {
                 ...filter,
@@ -268,7 +268,7 @@ export async function queryPrevAndAfter(
                 }
             },
             1
-        )
+        );
 
         ret.prev = prev[0];
         ret.next = next[0];

@@ -2,6 +2,7 @@ import {
     DB_NAME,
     DB_URL
 } from "../config";
+import redis from "redis";
 import {
     MongoClient,
     Db,
@@ -15,6 +16,8 @@ import {
 } from "mongodb";
 
 let db: Db;
+
+export const redisClient = redis.createClient();
 
 export function connectDb(callback: (db: Db, client: MongoClient) => void) {
     MongoClient.connect(

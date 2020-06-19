@@ -1,12 +1,12 @@
 import express from "express";
 import session from "express-session";
-import redis from "redis";
 import store from "connect-redis";
 import { join } from "path";
 import user from "./public";
 import admin from "./admin";
 import nonMatch from "./common/controllers/nonMatch"
 import handleError from "./common/controllers/handleError";
+import { redisClient } from "./db";
 
 export default function createApp() {
     const app = express();
@@ -20,7 +20,7 @@ export default function createApp() {
     app.use(express.text());
     app.use(
         session({
-            store: new RedisStore({ client: redis.createClient() }),
+            store: new RedisStore({ client: redisClient }),
             secret: "blog",
             rolling: true,
             resave: false,
