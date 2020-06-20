@@ -53,6 +53,10 @@ export default function upload(
             return next(err);
         }
 
+        if (!req.file) {
+            return next(new Error("没有文件"));
+        }
+
         const { 
             filename,
             dir
