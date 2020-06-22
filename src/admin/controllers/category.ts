@@ -10,6 +10,8 @@ import {
     findOne
 } from "../../db";
 import { CATEGORIES, ARTICLES } from "../../db/collections";
+import fs from "fs";
+import promisify from "../../common/utils/promisify";
 
 export { queryCategory } from "../../common/controllers/category";
 
@@ -21,7 +23,8 @@ export async function saveCategory(
     const {
         categoryId,
         categoryName,
-        categoryDesc
+        categoryDesc,
+        cover
     } = req.body;
     const isEdit = !!categoryId;
     let ret;
@@ -32,7 +35,8 @@ export async function saveCategory(
             _id,
             name: categoryName,
             desc: categoryDesc,
-            modifyTime: new Date()
+            modifyTime: new Date(),
+            cover
         };
 
         if (!isEdit) {
@@ -55,6 +59,14 @@ export async function saveCategory(
     }
 
     res.json({ code: 0 });
+}
+
+async function delCover(url: string) {
+    try {
+        await promisify(fs.unlink)(`${process.env.HOME}${url}`);
+    } catch (error) {
+
+    }
 }
 
 export async function delCategory(
@@ -81,6 +93,8 @@ export async function delCategory(
     }
 
     if (ret.value) {
+        delCover(ret.value.cover);
+
         return res.json({ code: 0 });
     }
 

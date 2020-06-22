@@ -2,13 +2,17 @@ import express from "express";
 import interceptor from "./controllers/interceptor";
 import { login, logout, updatePassword } from "./controllers/login";
 import upload from "./controllers/upload";
-import { saveArticle, deleteArticle } from "./controllers/article";
-import { queryArticle } from "../common/controllers/article";
+import {
+    saveArticle,
+    deleteArticle,
+    queryArticle
+} from "./controllers/article";
 import {
     saveCategory,
     delCategory,
     queryCategory
 } from "./controllers/category";
+import { queryComments } from "./controllers/comment";
 
 const app = express();
 
@@ -27,5 +31,8 @@ app.route("/category")
     .post(saveCategory)
     .delete(delCategory)
     .get(queryCategory);
+
+app.route("/comment")
+    .get(queryComments);
 
 export default app;
