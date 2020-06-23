@@ -7,9 +7,10 @@ import {
     queryCommentsByArticle,
     saveComment
 } from "../../common/controllers/comment";
-import { db } from "../../db";
+import { db, deleteMany } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
 import { ObjectId } from "mongodb";
+import nonMatch from "../../common/controllers/nonMatch";
 
 export { saveComment };
 
@@ -21,27 +22,34 @@ async function _queryComments(
     const PAGE_SIZE = 30;
     const collection = db.collection(COMMENTS);
     let {
-        prev,
-        after
+        before,
+        after,
+        pageSize
     } = req.query as any;
     let count = 0;
     let ret;
+    pageSize = Number(pageSize) || PAGE_SIZE;
+
+    if (pageSize < 0) pageSize = PAGE_SIZE;
 
     try {
         const pipeline = [];
         let countFilter: any;
+        let sort = 1;
 
-        //descend
-        if (prev) {
-            countFilter = {
-                _id: {
-                    $gt: new ObjectId(prev)
-                }
-            };
-        } else if (after) {
+        //descending sort
+        //prioritize after query
+        if (after) {
             countFilter = {
                 _id: {
                     $lt: new ObjectId(after)
+                }
+            };
+            sort = -1;
+        } else if (before) {
+            countFilter = {
+                _id: {
+                    $gt: new ObjectId(before)
                 }
             };
         }
@@ -54,19 +62,19 @@ async function _queryComments(
 
         count = await collection.countDocuments(countFilter || {}, {});
         ret = await collection.aggregate([
+            ...pipeline,
             {
                 $sort: {
-                    _id: -1
+                    _id: sort
                 }
             },
-            ...pipeline,
             {
                 $limit: PAGE_SIZE
             },
             {
                 $lookup: {
                     from: ARTICLES,
-                    let: {aId: "$articleId"},
+                    let: { aId: "$articleId" },
                     pipeline: [{
                         $match: {
                             $expr: {
@@ -91,9 +99,11 @@ async function _queryComments(
             {
                 $set: {
                     articleName: "$articleName.title"
-                }    
+                }
             }
-        ]).toArray()
+        ])
+            .sort({ _id: -1 })
+            .toArray()
     } catch (error) {
         return next(error);
     }
@@ -119,4 +129,44 @@ export function queryComments(
     }
 
     _queryComments(req, res, next);
+}
+
+export async function delComments(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const { commentId } = req.body;
+    let ret;
+
+    if (!commentId) {
+        return next(new Error("没有id"));
+    }
+
+    try {
+        const id = new ObjectId(commentId);
+
+        ret = await deleteMany(
+            COMMENTS,
+            {
+                $or: [{
+                    _id: id
+                }, {
+                    replyTo: id
+                }, {
+                    root: id
+                }]
+            }
+        );
+    } catch (error) {
+        return next(error);
+    }
+
+    if (ret.deletedCount) {
+        return res.json({
+            code: 0
+        });
+    }
+
+    return nonMatch(req, res, next);
 }

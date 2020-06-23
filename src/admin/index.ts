@@ -12,7 +12,7 @@ import {
     delCategory,
     queryCategory
 } from "./controllers/category";
-import { queryComments } from "./controllers/comment";
+import { queryComments, delComments } from "./controllers/comment";
 
 const app = express();
 
@@ -33,6 +33,7 @@ app.route("/category")
     .get(queryCategory);
 
 app.route("/comment")
-    .get(queryComments);
+    .get(queryComments)
+    .delete(delComments);
 
 export default app;
