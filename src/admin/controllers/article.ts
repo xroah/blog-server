@@ -10,7 +10,7 @@ import {
     findOneAndDelete,
     deleteMany
 } from "../../db";
-import { ARTICLES, IMAGES } from "../../db/collections";
+import { ARTICLES, IMAGES, COMMENTS } from "../../db/collections";
 import { ObjectID } from "mongodb";
 import { unlink } from "fs";
 import promisify from "../../common/utils/promisify";
@@ -126,6 +126,19 @@ async function deleteImages(articleId: ObjectID) {
     }
 }
 
+async function deleteComments(articleId: ObjectID) {
+    try {
+        await deleteMany(
+            COMMENTS,
+            {
+                articleId
+            }
+        )
+    } catch (error) {
+
+    }
+}
+
 export async function deleteArticle(
     req: Request,
     res: Response,
@@ -143,6 +156,7 @@ export async function deleteArticle(
         ret = await findOneAndDelete(ARTICLES, { _id });
 
         deleteImages(_id);
+        deleteComments(_id);
     } catch (error) {
         return next(error);
     }

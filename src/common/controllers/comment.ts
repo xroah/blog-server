@@ -70,6 +70,10 @@ export async function saveComment(
         return next(new Error("内容超过字数限制，最多500个字符"));
     }
 
+    if (!username && !req.session!.userId) {
+        return next(new Error("没有用户名"));
+    }
+
     try {
         const aId = new ObjectId(articleId);
         const article = await findArticle(aId);
