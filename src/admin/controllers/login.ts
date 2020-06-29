@@ -3,7 +3,13 @@ import {
     Response,
     NextFunction
 } from "express";
-import { findOne, findOneAndUpdate } from "../../db";
+import {
+    findOne,
+    findOneAndUpdate,
+    redisGet,
+    redisSet,
+    redisClient
+} from "../../db";
 import { createHash } from "crypto";
 
 function md5(str: string) {
@@ -12,7 +18,7 @@ function md5(str: string) {
         .digest("hex");
 }
 
-export function login(
+export async function login(
     req: Request,
     res: Response,
     next: NextFunction
@@ -21,7 +27,13 @@ export function login(
         username,
         password
     } = req.body || {};
-
+    const MAX_COUNT = 5;
+    const sess = req.session!;
+    const sessId = sess.id;
+    const redisKey = req.ip || sessId;
+    let ret;
+    let remainCount = 0;
+    
     if (!username || !password) {
         return res.json({
             code: -2,
@@ -29,41 +41,64 @@ export function login(
         });
     }
 
-    findOne(
-        "users",
-        {
-            username,
-            password: md5(password)
-        },
-        {
-            projection: {
-                createTime: 0,
-                password: 0
-            }
-        }).then(ret => {
-            if (!ret) {
-                return res.json({
-                    code: -1,
-                    msg: "用户名或密码错误！"
-                });
-            }
+    try {
+        remainCount = await redisGet(redisKey);
 
-            const session = req.session!;
-            const token = session.token = md5(`${ret.role}${username}${Math.random()}`);
+        if (remainCount == undefined) {
+            remainCount = MAX_COUNT;
+        } else if (remainCount <= 0) {
+            return next(new Error("输入密码次数超过限制！"));
+        }
+    } catch (error) {
+        
+    }
 
-            session.role = ret.role;
-            session.username = username;
-            session.userId = ret._id;
-
-            return res.json({
-                code: 0,
-                msg: "登录成功!",
-                data: {
-                    ...ret,
-                    token
+    try {
+        ret = await findOne(
+            "users",
+            {
+                username,
+                password: md5(password)
+            },
+            {
+                projection: {
+                    createTime: 0,
+                    password: 0
                 }
             });
-        }).catch(next);
+    } catch (error) {
+        return next(error);
+    }
+
+    if (!ret) {
+        try {
+            await redisSet(redisKey, --remainCount);
+
+            redisClient.expire(redisKey, 3600);
+        } catch (error) {
+            
+        }
+
+        return res.json({
+            code: -1,
+            msg: "用户名或密码错误！"
+        });
+    }
+
+    const token = sess.token = md5(`${ret.role}${username}${Math.random()}`);
+
+    sess.role = ret.role;
+    sess.username = username;
+    sess.userId = ret._id;
+
+    return res.json({
+        code: 0,
+        msg: "登录成功!",
+        data: {
+            ...ret,
+            token
+        }
+    });
 }
 
 export function logout(
@@ -92,7 +127,7 @@ export async function updatePassword(
         origPwd,
         newPwd
     } = req.body;
-    const { username } = req.session as any;
+    const { username } = req.session!;
     let ret;
 
     try {
@@ -113,7 +148,7 @@ export async function updatePassword(
     }
 
     if (ret.value) {
-        return res.json({code: 0});
+        return res.json({ code: 0 });
     }
 
     res.json({
