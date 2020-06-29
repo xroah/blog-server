@@ -11,6 +11,7 @@ import {
 } from "../../db";
 import { FEEDBACKS } from "../../db/collections";
 import noop from "../../common/utils/noop";
+import sanitize from "../../common/utils/sanitize";
 
 export async function saveFeedback(
     req: Request,
@@ -41,8 +42,8 @@ export async function saveFeedback(
         await insertOne(
             FEEDBACKS,
             {
-                email,
-                content,
+                email: sanitize(content),
+                content: sanitize(content),
                 createTime: new Date
             }
         );

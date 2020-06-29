@@ -14,6 +14,7 @@ import {
 } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
 import noop from "../utils/noop";
+import sanitize from "../utils/sanitize";
 
 async function findArticle(articleId: ObjectId) {
     let article = await findOne(
@@ -120,11 +121,11 @@ export async function saveComment(
             root: rootId,
             articleId: aId,
             replyTo: replyToId,
-            content,
+            content: sanitize(content),
             createTime: new Date,
             userId: req.session!.userId || new ObjectId(),
-            username: username ? String(username) : null,
-            homepage: homepage ? String(homepage) : null,
+            username: username ? sanitize(String(username)) : null,
+            homepage: homepage ? sanitize(String(homepage)) : null,
             isAuthor: article.authorId === req.session!.userId
         };
 
