@@ -31,6 +31,26 @@ async function findArticle(articleId: ObjectId) {
     return article;
 }
 
+async function findComment(root: ObjectId, replyTo: ObjectId) {
+    let query: any;
+
+    if (root.toHexString() === replyTo.toHexString()) {
+        //query the root comment
+        query = {
+            _id: root
+        }
+    } else {
+        query = {
+            _id: replyTo,
+            root
+        }
+    }
+
+    const comment = await findOne(COMMENTS, query);
+
+    return comment;
+}
+
 export async function saveComment(
     req: Request,
     res: Response,
@@ -78,19 +98,22 @@ export async function saveComment(
         const aId = new ObjectId(articleId);
         const article = await findArticle(aId);
 
-        if (!article) {
-            return next(new Error("文章不存在"));
+        if (!article) {//article may be deleted
+            return next(new Error("文章不存在或已被删除"));
         }
 
         let replyToId;
         let rootId;
-
-        if (replyTo) {
-            replyToId = new ObjectId(replyTo);
-        }
-
+        
         if (root) {
             rootId = new ObjectId(root);
+            replyToId = new ObjectId(replyTo);
+
+            const c = await findComment(rootId, replyToId);
+
+            if (!c) {//the comment may be deleted
+                return next(new Error("回复的评论不存在或已经被删除"));
+            }
         }
 
         result = {
