@@ -1,12 +1,14 @@
 import express from "express";
 import session from "express-session";
 import store from "connect-redis";
+import cookieParser from "cookie-parser";
 import { join } from "path";
 import user from "./public";
 import admin from "./admin";
 import nonMatch from "./common/controllers/nonMatch"
 import handleError from "./common/controllers/handleError";
 import { redisClient } from "./db";
+import { SESSION_KEY } from "./config";
 
 export default function createApp() {
     const app = express();
@@ -18,12 +20,13 @@ export default function createApp() {
         extended: true
     }));
     app.use(express.text());
+    app.use(cookieParser());
     app.use(
         session({
             store: new RedisStore({ client: redisClient }),
-            secret: "blog",
+            secret: SESSION_KEY,
             rolling: true,
-            resave: false,
+            resave: true,
             saveUninitialized: true,
             cookie: {
                 httpOnly: true,

@@ -19,6 +19,8 @@
   "homepage": "https://github.com/xroah/blog-server#readme",
   "devDependencies": {
     "@types/connect-redis": "0.0.13",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/cookie-signature": "^1.0.3",
     "@types/express": "^4.17.6",
     "@types/express-session": "^1.17.0",
     "@types/mongodb": "^3.5.16",
@@ -29,6 +31,8 @@
   "dependencies": {
     "@types/cron": "^1.7.2",
     "connect-redis": "^4.0.4",
+    "cookie-parser": "^1.4.5",
+    "cookie-signature": "^1.1.0",
     "cron": "^1.8.2",
     "express": "^4.17.1",
     "express-session": "^1.17.1",

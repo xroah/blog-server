@@ -9,8 +9,10 @@ import {
     redisClient,
     redisDel
 } from "../../db";
+import signature from "cookie-signature";
 import noop from "../../common/utils/noop";
 import isAdmin from "./isAdmin";
+import { SESSION_KEY } from "../../config";
 
 export default async function limitRequest(
     req: Request,
@@ -33,8 +35,15 @@ export default async function limitRequest(
             return next(error);
         }
     } else {
-        const saved = await redisGet(sessId);
+        const cookie = String(req.cookies["connect.sid"] || "").substring(2);
+        const _sessId = signature.unsign(cookie, SESSION_KEY);
+
+        if (sessId !== _sessId) {
+            return next(new Error("未知错误"));
+        }
+
         try {
+            const saved = await redisGet(sessId);
             //user can post one time within 1 minute
             if (saved) {
                 return next(new Error(BUSY_MSG));
