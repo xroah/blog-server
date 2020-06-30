@@ -3,32 +3,20 @@ import {
     Response,
     NextFunction
 } from "express";
-import {
-    redisGet,
-    redisSet,
-    insertOne,
-    redisClient
-} from "../../db";
+import { insertOne } from "../../db";
 import { FEEDBACKS } from "../../db/collections";
-import noop from "../../common/utils/noop";
 import sanitize from "../../common/utils/sanitize";
+import limitRequest from "../../common/utils/limitRequest";
 
 export async function saveFeedback(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
-    const { id } = req.session!;
     const {
         content = "",
         email = null
     } = req.body;
-    const sessId = id + "feedback";
-    const saved = await redisGet(sessId);
-
-    if (saved) {
-        return next(new Error("您的操作过于频繁，请稍候重试"));
-    }
 
     if (typeof content !== "string" || !content) {
         return next(new Error("请输入正确的内容"));
@@ -38,23 +26,21 @@ export async function saveFeedback(
         return next(new Error("内容最多500个字"));
     }
 
-    try {
-        await insertOne(
-            FEEDBACKS,
-            {
-                email: sanitize(content),
-                content: sanitize(content),
-                createTime: new Date
-            }
-        );
+    limitRequest(
+        req,
+        res,
+        next,
+        async () => {
+            await insertOne(
+                FEEDBACKS,
+                {
+                    email: email ? sanitize(email) : "",
+                    content: sanitize(content),
+                    createTime: new Date
+                }
+            );
 
-        redisSet(sessId, "saved");
-        redisClient.expire(sessId, 60, noop);
-    } catch (error) {
-        redisClient.del(sessId, noop);
-
-        return next(error);
-    }
-
-    res.json({ code: 0 });
+            return null;
+        }
+    );
 }

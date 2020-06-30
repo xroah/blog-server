@@ -7,14 +7,11 @@ import { ObjectId } from "mongodb";
 import {
     insertOne,
     findOne,
-    redisClient,
     db,
-    redisGet,
-    redisSet
 } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
-import noop from "../utils/noop";
 import sanitize from "../utils/sanitize";
+import limitRequest from "../utils/limitRequest";
 
 async function findArticle(articleId: ObjectId) {
     let article = await findOne(
@@ -65,15 +62,7 @@ export async function saveComment(
         homepage = "",
         username
     } = req.body;
-    const { id } = req.session!;
     let result: any;
-
-    //user can publish only one comment within 1 minute
-    let saved = await redisGet(id);
-
-    if (saved) {
-        return next(new Error("你的操作过于频繁，请稍后再试"));
-    }
 
     if (!articleId) {
         return next(new Error("没有articleId"));
@@ -95,58 +84,53 @@ export async function saveComment(
         return next(new Error("没有用户名"));
     }
 
-    try {
-        const aId = new ObjectId(articleId);
-        const article = await findArticle(aId);
+    limitRequest(
+        req,
+        res,
+        next,
+        async () => {
+            const aId = new ObjectId(articleId);
+            const article = await findArticle(aId);
 
-        if (!article) {//article may be deleted
-            return next(new Error("文章不存在或已被删除"));
-        }
-
-        let replyToId;
-        let rootId;
-        
-        if (root) {
-            rootId = new ObjectId(root);
-            replyToId = new ObjectId(replyTo);
-
-            const c = await findComment(rootId, replyToId);
-
-            if (!c) {//the comment may be deleted
-                return next(new Error("回复的评论不存在或已经被删除"));
+            if (!article) {//article may be deleted
+                return new Error("文章不存在或已被删除");
             }
+
+            let replyToId;
+            let rootId;
+
+            if (root) {
+                rootId = new ObjectId(root);
+                replyToId = new ObjectId(replyTo);
+
+                const c = await findComment(rootId, replyToId);
+
+                if (!c) {//the comment may be deleted
+                    return new Error("回复的评论不存在或已经被删除");
+                }
+            }
+
+            result = {
+                root: rootId,
+                articleId: aId,
+                replyTo: replyToId,
+                content: sanitize(content),
+                createTime: new Date,
+                userId: req.session!.userId || new ObjectId(),
+                username: username ? sanitize(String(username)) : null,
+                homepage: homepage ? sanitize(String(homepage)) : null,
+                isAuthor: article.authorId === req.session!.userId
+            };
+            const ret = await insertOne(
+                COMMENTS,
+                result
+            );
+
+            result._id = ret.insertedId;
+
+            return result;
         }
-
-        result = {
-            root: rootId,
-            articleId: aId,
-            replyTo: replyToId,
-            content: sanitize(content),
-            createTime: new Date,
-            userId: req.session!.userId || new ObjectId(),
-            username: username ? sanitize(String(username)) : null,
-            homepage: homepage ? sanitize(String(homepage)) : null,
-            isAuthor: article.authorId === req.session!.userId
-        };
-
-        await redisSet(id, "saved");
-
-        const ret = await insertOne(
-            COMMENTS,
-            result
-        );
-
-        result._id = ret.insertedId;
-        redisClient.expire(id, 60, noop);
-    } catch (error) {
-        redisClient.del(id, noop);
-        return next(error);
-    }
-
-    res.json({
-        code: 0,
-        data: result
-    });
+    );
 }
 
 export async function queryCommentsByArticle(
