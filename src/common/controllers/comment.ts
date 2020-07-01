@@ -8,6 +8,7 @@ import {
     insertOne,
     findOne,
     db,
+    find,
 } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
 import sanitize from "../utils/sanitize";
@@ -144,31 +145,7 @@ export async function queryCommentsByArticle(
     try {
         const aId = new ObjectId(articleId as any);
 
-        ret = await db.collection(COMMENTS)
-            .aggregate([
-                {
-                    $match: {
-                        $and: [{
-                            articleId: aId
-                        }, {
-                            root: null
-                        }]
-                    }
-                },
-                {
-                    $sort: {
-                        createTime: -1
-                    }
-                },
-                {
-                    $lookup: {
-                        from: COMMENTS,
-                        localField: "_id",
-                        foreignField: "root",
-                        as: "children"
-                    }
-                }
-            ]).toArray();
+        ret = await find(COMMENTS, {articleId: aId}).toArray();
     } catch (error) {
         return next(error);
     }
