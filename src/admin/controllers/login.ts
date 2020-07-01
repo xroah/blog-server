@@ -8,7 +8,8 @@ import {
     findOneAndUpdate,
     redisGet,
     redisSet,
-    redisClient
+    redisClient,
+    redisDel
 } from "../../db";
 import { createHash } from "crypto";
 
@@ -81,7 +82,7 @@ export async function login(
 
         return res.json({
             code: -1,
-            msg: "用户名或密码错误！"
+            msg: `用户名或密码错误， 还有${remainCount}次机会`
         });
     }
 
@@ -90,6 +91,8 @@ export async function login(
     sess.role = ret.role;
     sess.username = username;
     sess.userId = ret._id;
+
+    redisDel(redisKey).catch(() => {});
 
     return res.json({
         code: 0,
