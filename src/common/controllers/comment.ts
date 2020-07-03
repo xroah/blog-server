@@ -55,6 +55,7 @@ export async function saveComment(
     res: Response,
     next: NextFunction
 ) {
+    const MAX = 150;
     const {
         articleId,
         replyTo = null,
@@ -77,8 +78,8 @@ export async function saveComment(
         return next(new Error("内容格式错误"));
     }
 
-    if (content.length > 500) {
-        return next(new Error("内容超过字数限制，最多500个字符"));
+    if (content.length > MAX) {
+        return next(new Error(`内容超过字数限制，最多${MAX}个字符`));
     }
 
     if (!username && !req.session!.userId) {
