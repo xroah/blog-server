@@ -8,6 +8,7 @@ import {
     insertOne,
     findOne,
     db,
+    find,
 } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
 import sanitize from "../utils/sanitize";
@@ -54,6 +55,7 @@ export async function saveComment(
     res: Response,
     next: NextFunction
 ) {
+    const MAX = 150;
     const {
         articleId,
         replyTo = null,
@@ -76,8 +78,8 @@ export async function saveComment(
         return next(new Error("内容格式错误"));
     }
 
-    if (content.length > 500) {
-        return next(new Error("内容超过字数限制，最多500个字符"));
+    if (content.length > MAX) {
+        return next(new Error(`内容超过字数限制，最多${MAX}个字符`));
     }
 
     if (!username && !req.session!.userId) {
@@ -144,31 +146,7 @@ export async function queryCommentsByArticle(
     try {
         const aId = new ObjectId(articleId as any);
 
-        ret = await db.collection(COMMENTS)
-            .aggregate([
-                {
-                    $match: {
-                        $and: [{
-                            articleId: aId
-                        }, {
-                            root: null
-                        }]
-                    }
-                },
-                {
-                    $sort: {
-                        createTime: -1
-                    }
-                },
-                {
-                    $lookup: {
-                        from: COMMENTS,
-                        localField: "_id",
-                        foreignField: "root",
-                        as: "children"
-                    }
-                }
-            ]).toArray();
+        ret = await find(COMMENTS, {articleId: aId}).toArray();
     } catch (error) {
         return next(error);
     }
