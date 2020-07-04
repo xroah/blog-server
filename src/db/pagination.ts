@@ -11,9 +11,10 @@ export default async function pagination(
     res: Response,
     next: NextFunction,
     collection: string,
-    pipeline: any[]
+    pipeline: any[],
+    matches: any[] = []
 ) {
-    const PAGE_SIZE = 30;
+    const PAGE_SIZE = 10;
     const _collection = db.collection(collection);
     let {
         before,
@@ -27,9 +28,9 @@ export default async function pagination(
     if (pageSize < 0) pageSize = PAGE_SIZE;
 
     try {
-        const _pipeline = [];
+        let $match: any = [...matches];
         let countFilter: any;
-        let sort = 1;
+        let sort = -1;
 
         //descending sort
         //prioritize after query
@@ -39,24 +40,29 @@ export default async function pagination(
                     $lt: new ObjectId(after)
                 }
             };
-            sort = -1;
         } else if (before) {
             countFilter = {
                 _id: {
                     $gt: new ObjectId(before)
                 }
             };
+            sort = 1;
         }
 
         if (countFilter) {
-            _pipeline.push({
-                $match: countFilter
-            });
+            $match.push(countFilter);
         }
 
-        count = await _collection.countDocuments(countFilter || {}, {});
-        ret = await _collection.aggregate([
-            ..._pipeline,
+        if ($match.length > 1) {
+            $match = {
+                $and: $match
+            }
+        } else {
+            $match = $match[0];
+        }
+console.log($match)
+        count = await _collection.countDocuments($match || {}, {});
+        let _pipeline = [
             {
                 $sort: {
                     _id: sort
@@ -66,7 +72,12 @@ export default async function pagination(
                 $limit: PAGE_SIZE
             },
             ...pipeline
-        ])
+        ];
+
+        $match && _pipeline.unshift({ $match });
+
+        ret = await _collection
+            .aggregate(_pipeline)
             .sort({ _id: -1 })
             .toArray()
     } catch (error) {
