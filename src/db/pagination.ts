@@ -60,7 +60,7 @@ export default async function pagination(
         } else {
             $match = $match[0];
         }
-console.log($match)
+        
         count = await _collection.countDocuments($match || {}, {});
         let _pipeline = [
             {
@@ -69,7 +69,7 @@ console.log($match)
                 }
             },
             {
-                $limit: PAGE_SIZE
+                $limit: pageSize
             },
             ...pipeline
         ];
@@ -88,7 +88,7 @@ console.log($match)
         code: 0,
         data: {
             list: ret,
-            hasMore: count > PAGE_SIZE
+            hasMore: count > pageSize
         }
     });
 }
