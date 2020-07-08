@@ -17,6 +17,7 @@ import {
     delComments,
     saveComment
 } from "./controllers/comment";
+import { queryFeedbacks, delFeedback } from "./controllers/feedback";
 
 const app = express();
 
@@ -40,5 +41,9 @@ app.route("/comment")
     .get(queryComments)
     .delete(delComments)
     .post(saveComment);
+
+app.route("/feedback")
+    .get(queryFeedbacks)
+    .delete(delFeedback);
 
 export default app;
