@@ -13,6 +13,7 @@ import {
 import { COMMENTS, ARTICLES } from "../../db/collections";
 import sanitize from "../utils/sanitize";
 import limitRequest from "../utils/limitRequest";
+import Code from "../../code";
 
 async function findArticle(articleId: ObjectId) {
     let article = await findOne(
@@ -67,23 +68,23 @@ export async function saveComment(
     let result: any;
 
     if (!articleId) {
-        return next(new Error("没有articleId"));
+        return res.error(Code.PARAM_ERROR, ("没有articleId"));
     }
 
     if (!content) {
-        return next(new Error("没有评论内容"));
+        return res.error(Code.PARAM_ERROR, "没有评论内容");
     }
 
     if (typeof content !== "string") {
-        return next(new Error("内容格式错误"));
+        return res.error(Code.PARAM_ERROR, "内容格式错误");
     }
 
     if (content.length > MAX) {
-        return next(new Error(`内容超过字数限制，最多${MAX}个字符`));
+        return res.error(Code.PARAM_ERROR, `内容超过字数限制，最多${MAX}个字符`);
     }
 
     if (!username && !req.session!.userId) {
-        return next(new Error("没有用户名"));
+        return res.error(Code.PARAM_ERROR, "没有用户名");
     }
 
     limitRequest(
@@ -95,7 +96,7 @@ export async function saveComment(
             const article = await findArticle(aId);
 
             if (!article) {//article may be deleted
-                return new Error("文章不存在或已被删除");
+                return res.error(Code.NOT_EXISTS, "文章不存在或已被删除")
             }
 
             let replyToId;
@@ -108,7 +109,7 @@ export async function saveComment(
                 const c = await findComment(rootId, replyToId);
 
                 if (!c) {//the comment may be deleted
-                    return new Error("回复的评论不存在或已经被删除");
+                    return res.error(Code.NOT_EXISTS, "回复的评论不存在或已经被删除");
                 }
             }
 
@@ -151,8 +152,5 @@ export async function queryCommentsByArticle(
         return next(error);
     }
 
-    res.json({
-        code: 0,
-        data: ret
-    });
+    res.json2(Code.SUCCESS);
 }

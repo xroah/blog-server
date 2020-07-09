@@ -14,6 +14,7 @@ import { ARTICLES, IMAGES, COMMENTS } from "../../db/collections";
 import { ObjectID } from "mongodb";
 import { unlink } from "fs";
 import promisify from "../../common/utils/promisify";
+import Code from "../../code";
 
 export { queryArticle } from "../../common/controllers/article";
 
@@ -70,7 +71,7 @@ export async function saveArticle(
 
         if (!draft) {
             if (!categoryId) {
-                throw new Error("没有categoryId");
+                return res.error(Code.PARAM_ERROR, "没有categoryId");
             }
 
             categoryId = new ObjectID(categoryId);
@@ -100,12 +101,7 @@ export async function saveArticle(
         return next(error);
     }
 
-    res.json({
-        code: 0,
-        data: {
-            _id
-        }
-    });
+    res.json2(Code.SUCCESS, { _id });
 }
 
 async function deleteImages(articleId: ObjectID) {
@@ -149,7 +145,7 @@ export async function deleteArticle(
 
     try {
         if (!articleId) {
-            throw new Error("没有传articleId");
+            return res.error(Code.PARAM_ERROR, "没有传articleId");
         }
 
         const _id = new ObjectID(articleId);
@@ -162,11 +158,8 @@ export async function deleteArticle(
     }
 
     if (ret.value) {
-        return res.json({ code: 0 });
+        return res.json2(Code.SUCCESS);
     }
 
-    res.json({
-        code: 1,
-        msg: "删除失败"
-    });
+    res.error(Code.NOT_EXISTS, "删除失败，文章不存在或已被删除");
 }

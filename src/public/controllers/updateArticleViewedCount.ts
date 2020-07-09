@@ -5,6 +5,7 @@ import {
 import { ARTICLES } from "../../db/collections";
 import { updateOne } from "../../db";
 import { ObjectId } from "mongodb";
+import Code from "../../code";
 
 export default async function updateArticleViewedCount(
     req: Request,
@@ -28,7 +29,7 @@ export default async function updateArticleViewedCount(
             }
         );
 
-        res.json({ code: 0 });
+        res.json2(Code.SUCCESS);
     } catch (error) {
 
     }

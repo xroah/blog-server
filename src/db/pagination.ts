@@ -5,6 +5,7 @@ import {
 } from "express";
 import { ObjectId } from "mongodb";
 import { db } from ".";
+import Code from "../code";
 
 export default async function pagination(
     req: Request,
@@ -84,11 +85,11 @@ export default async function pagination(
         return next(error);
     }
 
-    res.json({
-        code: 0,
-        data: {
+    res.json2(
+        Code.SUCCESS,
+        {
             list: ret,
             hasMore: count > pageSize
         }
-    });
+    );
 }

@@ -14,11 +14,7 @@ export default function responseError(
     file: string
 ) {
     if (req.xhr) {
-        res.status(code);
-        return res.json({
-            code,
-            msg
-        });
+        return res.error(code, msg, code);
     }
 
     res.sendFile(

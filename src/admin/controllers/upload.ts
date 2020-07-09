@@ -9,6 +9,7 @@ import {
     Response,
     NextFunction
 } from "express";
+import Code from "../../code";
 
 const FIELD_NAME = "articleImage";
 
@@ -54,19 +55,14 @@ export default function upload(
         }
 
         if (!req.file) {
-            return next(new Error("没有文件"));
+            return res.error(Code.COMMON_ERROR, "没有文件");
         }
 
-        const { 
+        const {
             filename,
             dir
         } = req.file as any;
 
-        res.json({
-            code: 0,
-            data: {
-                url: `${dir}/${filename}`
-            }
-        });
+        res.json2(Code.SUCCESS, { url: `${dir}/${filename}` });
     });
 }

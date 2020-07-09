@@ -4,6 +4,7 @@ import {
     Response,
     NextFunction
 } from "express";
+import Code from "../../code";
 
 export default function fetchBingPic(
     req: Request,
@@ -34,13 +35,13 @@ export default function fetchBingPic(
                     const info: any = JSON.parse(ret) || {};
                     const img = info.images[0] || {};
 
-                    res.json({
-                        code: 0,
-                        data: {
+                    res.json2(
+                        Code.SUCCESS,
+                        {
                             url: `https://${hostname}${img.url}`,
                             copyright: img.copyright
                         }
-                    });
+                    );
                 });
             }
         );

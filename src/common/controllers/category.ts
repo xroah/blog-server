@@ -5,6 +5,7 @@ import {
 } from "express";
 import { find, db } from "../../db";
 import { CATEGORIES, ARTICLES } from "../../db/collections";
+import Code from "../../code";
 
 export async function queryCategory(
     req: Request,
@@ -63,8 +64,5 @@ export async function queryCategory(
         return next(error);
     }
 
-    res.json({
-        code: 0,
-        data: ret
-    });
+    res.json2(Code.SUCCESS, ret);
 }

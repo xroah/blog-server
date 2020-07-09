@@ -12,6 +12,7 @@ import {
     COMMENTS
 } from "../../db/collections";
 import isAdmin from "../utils/isAdmin";
+import Code from "../../code";
 
 async function queryById(
     req: Request,
@@ -198,13 +199,13 @@ async function queryByCondition(
         return next(error);
     }
 
-    res.json({
-        code: 0,
-        data: {
+    res.json2(
+        Code.SUCCESS,
+        {
             total: count,
             list: ret
         }
-    });
+    );
 }
 
 export function queryArticle(
@@ -279,8 +280,5 @@ export async function queryPrevAndAfter(
         return next(error);
     }
 
-    res.json({
-        code: 0,
-        data: ret
-    });
+    res.json2(Code.SUCCESS, ret);
 }

@@ -12,6 +12,7 @@ import {
     redisDel
 } from "../../db";
 import { createHash } from "crypto";
+import Code from "../../code";
 
 function md5(str: string) {
     return createHash("md5")
@@ -34,12 +35,9 @@ export async function login(
     const redisKey = req.ip || sessId;
     let ret;
     let remainCount = 0;
-    
+
     if (!username || !password) {
-        return res.json({
-            code: -2,
-            msg: "请输入用户名和密码！"
-        });
+        return res.error(Code.COMMON_ERROR, "请输入用户名和密码！");
     }
 
     try {
@@ -48,10 +46,10 @@ export async function login(
         if (remainCount == undefined) {
             remainCount = MAX_COUNT;
         } else if (remainCount <= 0) {
-            return next(new Error("输入密码次数超过限制！"));
+            return res.error(Code.LOGIN_ERROR, "输入密码次数超过限制！");
         }
     } catch (error) {
-        
+
     }
 
     try {
@@ -77,13 +75,10 @@ export async function login(
 
             redisClient.expire(redisKey, 3600);
         } catch (error) {
-            
+
         }
 
-        return res.json({
-            code: -1,
-            msg: `用户名或密码错误， 还有${remainCount}次机会`
-        });
+        return res.error(Code.LOGIN_ERROR, `用户名或密码错误， 还有${remainCount}次机会`);
     }
 
     const token = sess.token = md5(`${ret.role}${username}${Math.random()}`);
@@ -92,16 +87,15 @@ export async function login(
     sess.username = username;
     sess.userId = ret._id;
 
-    redisDel(redisKey).catch(() => {});
+    redisDel(redisKey).catch(() => { });
 
-    return res.json({
-        code: 0,
-        msg: "登录成功!",
-        data: {
+    return res.json2(
+        Code.SUCCESS,
+        {
             ...ret,
             token
         }
-    });
+    );
 }
 
 export function logout(
@@ -109,15 +103,12 @@ export function logout(
     res: Response,
     next: NextFunction
 ) {
-    req.session?.destroy(err => {
+    req.session!.destroy(err => {
         if (err) {
             return next(err);
         }
 
-        res.json({
-            code: 0,
-            msg: "退出成功"
-        });
+        res.json2(Code.SUCCESS);
     });
 }
 
@@ -151,11 +142,8 @@ export async function updatePassword(
     }
 
     if (ret.value) {
-        return res.json({ code: 0 });
+        return res.json2(Code.SUCCESS);
     }
 
-    res.json({
-        code: 1,
-        msg: "原密码不正确"
-    });
+    res.error(Code.COMMON_ERROR, "原密码不正确");
 }

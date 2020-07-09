@@ -32,22 +32,19 @@ export async function delFeedback(
     let ret;
 
     try {
-       ret = await findOneAndDelete(
-           FEEDBACKS,
-           {
-               _id: new ObjectId(feedbackId)
-           }
-       ); 
+        ret = await findOneAndDelete(
+            FEEDBACKS,
+            {
+                _id: new ObjectId(feedbackId)
+            }
+        );
     } catch (error) {
         return next(error);
     }
 
     if (ret.value) {
-        return res.error(
-            Code.NOT_EXISTS,
-            "该数据不存在或已被删除"
-        );
+        return res.json2(Code.SUCCESS);
     }
 
-    res.json2(Code.SUCCESS);
+    res.error(Code.NOT_EXISTS, "该数据不存在或已被删除");
 }

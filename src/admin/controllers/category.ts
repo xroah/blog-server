@@ -12,6 +12,7 @@ import {
 import { CATEGORIES, ARTICLES } from "../../db/collections";
 import fs from "fs";
 import promisify from "../../common/utils/promisify";
+import Code from "../../code";
 
 export { queryCategory } from "../../common/controllers/category";
 
@@ -44,7 +45,7 @@ export async function saveCategory(
             data.createTime = new Date();
 
             if (exist) {
-                return next(new Error("分类已存在"));
+                return res.error(Code.COMMON_ERROR, "分类已存在");
             }
         }
 
@@ -58,7 +59,7 @@ export async function saveCategory(
         return next(error);
     }
 
-    res.json({ code: 0 });
+    res.json2(Code.SUCCESS);
 }
 
 async function delCover(url: string) {
@@ -84,7 +85,7 @@ export async function delCategory(
         const article = await findOne(ARTICLES, { categoryId: _id });
 
         if (article) {
-            return next(new Error("有文章属于该分类，不能删除"));
+            return res.error(Code.SUCCESS, "有文章属于该分类，不能删除");
         }
 
         ret = await findOneAndDelete(CATEGORIES, { _id });
@@ -95,11 +96,8 @@ export async function delCategory(
     if (ret.value) {
         delCover(ret.value.cover);
 
-        return res.json({ code: 0 });
+        return res.json2(Code.SUCCESS);
     }
 
-    res.json({
-        code: 0,
-        msg: "删除失败"
-    });
+    res.error(Code.NOT_EXISTS, "分类不存在或已被删除");
 }

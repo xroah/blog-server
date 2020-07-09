@@ -12,6 +12,7 @@ import { COMMENTS, ARTICLES } from "../../db/collections";
 import { ObjectId } from "mongodb";
 import nonMatch from "../../common/controllers/nonMatch";
 import pagination from "../../db/pagination";
+import Code from "../../code";
 
 export { saveComment };
 
@@ -81,7 +82,7 @@ export async function delComments(
     let ret;
 
     if (!commentId) {
-        return next(new Error("没有id"));
+        return res.error(Code.PARAM_ERROR, "没有commentId");
     }
 
     try {
@@ -104,10 +105,8 @@ export async function delComments(
     }
 
     if (ret.deletedCount) {
-        return res.json({
-            code: 0
-        });
+        return res.json2(Code.SUCCESS);
     }
 
-    return nonMatch(req, res, next);
+    res.error(Code.NOT_EXISTS, "评论不存在或已被删除")
 }

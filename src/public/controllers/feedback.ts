@@ -7,6 +7,7 @@ import { insertOne } from "../../db";
 import { FEEDBACKS } from "../../db/collections";
 import sanitize from "../../common/utils/sanitize";
 import limitRequest from "../../common/utils/limitRequest";
+import Code from "../../code";
 
 export async function saveFeedback(
     req: Request,
@@ -19,11 +20,11 @@ export async function saveFeedback(
     } = req.body;
 
     if (typeof content !== "string" || !content) {
-        return next(new Error("请输入正确的内容"));
+        return res.error(Code.PARAM_ERROR, "请输入正确的内容");
     }
 
     if (content.length > 500) {
-        return next(new Error("内容最多500个字"));
+        return res.error(Code.PARAM_ERROR, "内容最多500个字");
     }
 
     limitRequest(

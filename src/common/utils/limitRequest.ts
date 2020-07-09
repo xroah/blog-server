@@ -13,6 +13,7 @@ import signature from "cookie-signature";
 import noop from "../../common/utils/noop";
 import isAdmin from "./isAdmin";
 import { SESSION_KEY } from "../../config";
+import Code from "../../code";
 
 export default async function limitRequest(
     req: Request,
@@ -39,14 +40,14 @@ export default async function limitRequest(
         const _sessId = signature.unsign(cookie, SESSION_KEY);
 
         if (sessId !== _sessId) {
-            return next(new Error("未知错误"));
+            return res.error(Code.UNKNOWN_ERROR, "未知错误");
         }
 
         try {
             const saved = await redisGet(sessId);
             //user can post one time within 1 minute
             if (saved) {
-                return next(new Error(BUSY_MSG));
+                return res.error(Code.FEQUENCy_ERROR, BUSY_MSG);
             }
 
             ret = await operate();
@@ -64,5 +65,5 @@ export default async function limitRequest(
         }
     }
 
-    res.json({ code: 0, data: ret });
+    res.json2(Code.SUCCESS, ret);
 }
