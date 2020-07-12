@@ -7,7 +7,7 @@ import { findOneAndDelete } from "../../db";
 import { FEEDBACKS } from "../../db/collections";
 import { ObjectId } from "mongodb";
 import Code from "../../code";
-import pagination from "../../db/pagination";
+import pagination from "../../common/utils/pagination";
 
 export function queryFeedbacks(
     req: Request,

@@ -7,7 +7,6 @@ import { ObjectId } from "mongodb";
 import {
     insertOne,
     findOne,
-    db,
     find,
 } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";

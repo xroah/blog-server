@@ -10,8 +10,7 @@ import {
 import { deleteMany } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
 import { ObjectId } from "mongodb";
-import nonMatch from "../../common/controllers/nonMatch";
-import pagination from "../../db/pagination";
+import pagination from "../../common/utils/pagination";
 import Code from "../../code";
 
 export { saveComment };

@@ -4,8 +4,8 @@ import {
     NextFunction
 } from "express";
 import { ObjectId } from "mongodb";
-import { db } from ".";
-import Code from "../code";
+import { db } from "../../db";
+import Code from "../../code";
 
 export default async function pagination(
     req: Request,
