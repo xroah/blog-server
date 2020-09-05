@@ -5,7 +5,7 @@ import {
 } from "express";
 import { insertOne } from "../../db";
 import { FEEDBACKS } from "../../db/collections";
-import sanitize from "../../common/utils/sanitize";
+import sanitize from "sanitize-html";
 import limitRequest from "../../common/utils/limitRequest";
 import Code from "../../code";
 

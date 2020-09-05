@@ -10,7 +10,7 @@ import {
     find,
 } from "../../db";
 import { COMMENTS, ARTICLES } from "../../db/collections";
-import sanitize from "../utils/sanitize";
+import sanitize from "sanitize-html"
 import limitRequest from "../utils/limitRequest";
 import Code from "../../code";
 
