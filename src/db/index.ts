@@ -36,19 +36,19 @@ export function connectDb(callback: (db: Db, client: MongoClient) => void) {
     }).catch(err => console.error(err));
 }
 
-export function find(collection: string, filter: object, options?: FindOneOptions) {
+export function find(collection: string, filter: object, options?: FindOneOptions<any>) {
     return db.collection(collection).find(filter, options);
 }
 
-export function findOne(collection: string, query: object, options?: FindOneOptions) {
+export function findOne(collection: string, query: object, options?: FindOneOptions<any>) {
     return db.collection(collection).findOne(query, options);
 }
 
-export function findOneAndUpdate(collection: string, filter: object, update: object, options?: FindOneAndUpdateOption) {
+export function findOneAndUpdate(collection: string, filter: object, update: object, options?: FindOneAndUpdateOption<any>) {
     return db.collection(collection).findOneAndUpdate(filter, update, options);
 }
 
-export function findOneAndDelete(collection: string, filter: object, options?: FindOneAndDeleteOption) {
+export function findOneAndDelete(collection: string, filter: object, options?: FindOneAndDeleteOption<any>) {
     return db.collection(collection).findOneAndDelete(filter, options);
 }
 
