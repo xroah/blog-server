@@ -2,12 +2,12 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
-import { insertOne } from "../../db";
-import { FEEDBACKS } from "../../db/collections";
-import sanitize from "sanitize-html";
-import limitRequest from "../../common/utils/limitRequest";
-import Code from "../../code";
+} from "express"
+import { insertOne } from "../../db"
+import { FEEDBACKS } from "../../db/collections"
+import sanitize from "sanitize-html"
+import limitRequest from "../../common/utils/limitRequest"
+import Code from "../../code"
 
 export async function saveFeedback(
     req: Request,
@@ -17,14 +17,14 @@ export async function saveFeedback(
     const {
         content = "",
         email = null
-    } = req.body;
+    } = req.body
 
     if (typeof content !== "string" || !content) {
-        return res.error(Code.PARAM_ERROR, "请输入正确的内容");
+        return res.error(Code.PARAM_ERROR, "请输入正确的内容")
     }
 
     if (content.length > 500) {
-        return res.error(Code.PARAM_ERROR, "内容最多500个字");
+        return res.error(Code.PARAM_ERROR, "内容最多500个字")
     }
 
     limitRequest(
@@ -39,9 +39,9 @@ export async function saveFeedback(
                     content: sanitize(content),
                     createTime: new Date
                 }
-            );
+            )
 
-            return null;
+            return null
         }
-    );
+    )
 }

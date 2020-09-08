@@ -1,48 +1,48 @@
-import multer from "multer";
-import { ObjectID } from "mongodb";
+import multer from "multer"
+import { ObjectID } from "mongodb"
 import {
     existsSync,
     mkdirSync
-} from "fs";
+} from "fs"
 import {
     Request,
     Response,
     NextFunction
-} from "express";
-import Code from "../../code";
+} from "express"
+import Code from "../../code"
 
-const FIELD_NAME = "articleImage";
+const FIELD_NAME = "articleImage"
 
 const mimeType = new Map([
     ["image/png", ".png"],
     ["image/jpeg", ".jpg"]
-]);
+])
 
 const storage = multer.diskStorage({
     destination(req, file, cb) {
-        const date = new Date();
-        const year = date.getFullYear();
-        const mon = String(100 + date.getMonth() + 1).substring(1);
-        const dir = `/uploads/${year}/${mon}`;
-        const dest = `${process.env.HOME || "/"}${dir}`;
+        const date = new Date()
+        const year = date.getFullYear()
+        const mon = String(100 + date.getMonth() + 1).substring(1)
+        const dir = `/uploads/${year}/${mon}`
+        const dest = `${process.env.HOME || "/"}${dir}`
 
-        (file as any).dir = dir;
+        (file as any).dir = dir
 
         if (!existsSync(dest)) {
-            mkdirSync(dest, { recursive: true });
+            mkdirSync(dest, { recursive: true })
         }
 
-        cb(null, dest);
+        cb(null, dest)
     },
     filename(req, file, cb) {
-        const ext = mimeType.get(file.mimetype) as string;
-        const id = new ObjectID();
-        const name = id + ext;
+        const ext = mimeType.get(file.mimetype) as string
+        const id = new ObjectID()
+        const name = id + ext
 
-        cb(null, name);
+        cb(null, name)
     }
-});
-const uploads = multer({ storage }).single(FIELD_NAME);
+})
+const uploads = multer({ storage }).single(FIELD_NAME)
 
 export default function upload(
     req: Request,
@@ -51,18 +51,18 @@ export default function upload(
 ) {
     uploads(req, res, (err: any) => {
         if (err) {
-            return next(err);
+            return next(err)
         }
 
         if (!req.file) {
-            return res.error(Code.COMMON_ERROR, "没有文件");
+            return res.error(Code.COMMON_ERROR, "没有文件")
         }
 
         const {
             filename,
             dir
-        } = req.file as any;
+        } = req.file as any
 
-        res.json2(Code.SUCCESS, { url: `${dir}/${filename}` });
-    });
+        res.json2(Code.SUCCESS, { url: `${dir}/${filename}` })
+    })
 }

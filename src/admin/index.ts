@@ -1,49 +1,49 @@
-import express from "express";
-import interceptor from "./controllers/interceptor";
-import { login, logout, updatePassword } from "./controllers/login";
-import upload from "./controllers/upload";
+import express from "express"
+import interceptor from "./controllers/interceptor"
+import { login, logout, updatePassword } from "./controllers/login"
+import upload from "./controllers/upload"
 import {
     saveArticle,
     deleteArticle,
     queryArticle
-} from "./controllers/article";
+} from "./controllers/article"
 import {
     saveCategory,
     delCategory,
     queryCategory
-} from "./controllers/category";
+} from "./controllers/category"
 import {
     queryComments,
     delComments,
     saveComment
-} from "./controllers/comment";
-import { queryFeedbacks, delFeedback } from "./controllers/feedback";
+} from "./controllers/comment"
+import { queryFeedbacks, delFeedback } from "./controllers/feedback"
 
-const app = express();
+const app = express()
 
 app.all("*", interceptor)
     .post("/login", login)
     .post("/logout", logout)
     .post("/password", updatePassword)
-    .post("/upload", upload);
+    .post("/upload", upload)
 
 app.route("/article")
     .post(saveArticle)
     .get(queryArticle)
-    .delete(deleteArticle);
+    .delete(deleteArticle)
 
 app.route("/category")
     .post(saveCategory)
     .delete(delCategory)
-    .get(queryCategory);
+    .get(queryCategory)
 
 app.route("/comment")
     .get(queryComments)
     .delete(delComments)
-    .post(saveComment);
+    .post(saveComment)
 
 app.route("/feedback")
     .get(queryFeedbacks)
-    .delete(delFeedback);
+    .delete(delFeedback)
 
-export default app;
+export default app

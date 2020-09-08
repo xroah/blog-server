@@ -2,33 +2,33 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
-import nonMatch from "./nonMatch";
-import { ObjectID } from "mongodb";
-import { db, find } from "../../db";
+} from "express"
+import nonMatch from "./nonMatch"
+import { ObjectID } from "mongodb"
+import { db, find } from "../../db"
 import {
     ARTICLES,
     CATEGORIES,
     COMMENTS
-} from "../../db/collections";
-import isAdmin from "../utils/isAdmin";
-import Code from "../../code";
+} from "../../db/collections"
+import isAdmin from "../utils/isAdmin"
+import Code from "../../code"
 
 async function queryById(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query;
+    const { articleId } = req.query
 
-    const admin = isAdmin(req);
-    let ret;
+    const admin = isAdmin(req)
+    let ret
 
     try {
-        const _id = new ObjectID(articleId as string);
+        const _id = new ObjectID(articleId as string)
         const filter: any = {
             _id
-        };
+        }
 
         if (!admin) {
             filter.secret = {
@@ -69,14 +69,14 @@ async function queryById(
                         modifyTime: 0
                     }
                 }
-            ]).toArray();
-        ret = ret[0];
+            ]).toArray()
+        ret = ret[0]
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
     if (!ret) {
-        return nonMatch(req, res, next);
+        return nonMatch(req, res, next)
     }
 
     res.json({
@@ -90,55 +90,55 @@ async function queryByCondition(
     res: Response,
     next: NextFunction
 ) {
-    const admin = isAdmin(req);
+    const admin = isAdmin(req)
     const {
         page,
         pageSize,
         secret,
         draft,
         categoryId
-    } = req.query;
-    let _pageSize = Number(pageSize) || 10;
-    const filter: any[] = [];
+    } = req.query
+    let _pageSize = Number(pageSize) || 10
+    const filter: any[] = []
     const options: any = {
         projection: {
             content: 0,
             secret: 0
         }
-    };
+    }
     const nonSecret = {
         secret: {
             $not: {
                 $eq: true
             }
         }
-    };
+    }
     const nonDraft = {
         draft: {
             $not: {
                 $eq: true
             }
         }
-    };
-    let _page = Number(page) || 1;
-    let ret;
-    let count;
+    }
+    let _page = Number(page) || 1
+    let ret
+    let count
 
     if (!admin) {
-        filter.push(nonDraft, nonSecret);
+        filter.push(nonDraft, nonSecret)
 
-        options.projection.draft = 0;
+        options.projection.draft = 0
     } else {
         if (secret === "true") {
-            filter.push({ secret: true });
+            filter.push({ secret: true })
         } else if (secret === "false") {
-            filter.push(nonSecret);
+            filter.push(nonSecret)
         }
 
         if (draft === "true") {
-            filter.push({ draft: true });
+            filter.push({ draft: true })
         } else if (draft === "false") {
-            filter.push(nonDraft);
+            filter.push(nonDraft)
         }
     }
 
@@ -146,14 +146,14 @@ async function queryByCondition(
         if (categoryId) {
             filter.push({
                 categoryId: new ObjectID(categoryId as any)
-            });
+            })
         }
 
         const $match = filter.length ? {
             $and: filter
-        } : {};
+        } : {}
 
-        count = await db.collection(ARTICLES).countDocuments($match, {});
+        count = await db.collection(ARTICLES).countDocuments($match, {})
         ret = await db.collection(ARTICLES)
             .aggregate([{
                 $match
@@ -194,9 +194,9 @@ async function queryByCondition(
                 $project: {
                     comments: 0
                 }
-            }]).toArray();
+            }]).toArray()
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
     res.json2(
@@ -205,7 +205,7 @@ async function queryByCondition(
             total: count,
             list: ret
         }
-    );
+    )
 }
 
 export function queryArticle(
@@ -214,10 +214,10 @@ export function queryArticle(
     next: NextFunction
 ) {
     if (req.query.articleId !== undefined) {
-        return queryById(req, res, next);
+        return queryById(req, res, next)
     }
 
-    queryByCondition(req, res, next);
+    queryByCondition(req, res, next)
 }
 
 export async function queryPrevAndAfter(
@@ -225,20 +225,20 @@ export async function queryPrevAndAfter(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query;
-    const admin = isAdmin(req);
-    const ret: any = {};
-    let filter: any = {};
+    const { articleId } = req.query
+    const admin = isAdmin(req)
+    const ret: any = {}
+    let filter: any = {}
     const _find = (filter: any, sort: number) => {
         return find(ARTICLES, filter)
             .sort({ _id: sort })
             .limit(1)
             .project({ _id: 1 })
-            .toArray();
+            .toArray()
     }
 
     try {
-        const _id = new ObjectID(articleId as any);
+        const _id = new ObjectID(articleId as any)
 
         if (!admin) {
             filter = {
@@ -252,7 +252,7 @@ export async function queryPrevAndAfter(
                         $eq: true
                     }
                 }
-            };
+            }
         }
 
         const next = await _find(
@@ -263,7 +263,7 @@ export async function queryPrevAndAfter(
                 }
             },
             -1
-        );
+        )
         const prev = await _find(
             {
                 ...filter,
@@ -272,13 +272,13 @@ export async function queryPrevAndAfter(
                 }
             },
             1
-        );
+        )
 
-        ret.prev = prev[0];
-        ret.next = next[0];
+        ret.prev = prev[0]
+        ret.next = next[0]
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
-    res.json2(Code.SUCCESS, ret);
+    res.json2(Code.SUCCESS, ret)
 }

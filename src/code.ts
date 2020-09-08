@@ -10,4 +10,4 @@ enum Code {
     UNKNOWN_ERROR = 1024
 }
 
-export default Code;
+export default Code

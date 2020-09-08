@@ -2,10 +2,10 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
-import { ObjectId } from "mongodb";
-import { db } from "../../db";
-import Code from "../../code";
+} from "express"
+import { ObjectId } from "mongodb"
+import { db } from "../../db"
+import Code from "../../code"
 
 export default async function pagination(
     req: Request,
@@ -15,23 +15,23 @@ export default async function pagination(
     pipeline: any[],
     matches: any[] = []
 ) {
-    const PAGE_SIZE = 10;
-    const _collection = db.collection(collection);
+    const PAGE_SIZE = 10
+    const _collection = db.collection(collection)
     let {
         before,
         after,
         pageSize
-    } = req.query as any;
-    let count = 0;
-    let ret;
-    pageSize = Number(pageSize) || PAGE_SIZE;
+    } = req.query as any
+    let count = 0
+    let ret
+    pageSize = Number(pageSize) || PAGE_SIZE
 
-    if (pageSize < 0) pageSize = PAGE_SIZE;
+    if (pageSize < 0) pageSize = PAGE_SIZE
 
     try {
-        let $match: any = [...matches];
-        let countFilter: any;
-        let sort = -1;
+        let $match: any = [...matches]
+        let countFilter: any
+        let sort = -1
 
         //descending sort
         //prioritize after query
@@ -40,18 +40,18 @@ export default async function pagination(
                 _id: {
                     $lt: new ObjectId(after)
                 }
-            };
+            }
         } else if (before) {
             countFilter = {
                 _id: {
                     $gt: new ObjectId(before)
                 }
-            };
-            sort = 1;
+            }
+            sort = 1
         }
 
         if (countFilter) {
-            $match.push(countFilter);
+            $match.push(countFilter)
         }
 
         if ($match.length > 1) {
@@ -59,10 +59,10 @@ export default async function pagination(
                 $and: $match
             }
         } else {
-            $match = $match[0];
+            $match = $match[0]
         }
         
-        count = await _collection.countDocuments($match || {}, {});
+        count = await _collection.countDocuments($match || {}, {})
         let _pipeline = [
             {
                 $sort: {
@@ -73,16 +73,16 @@ export default async function pagination(
                 $limit: pageSize
             },
             ...pipeline
-        ];
+        ]
 
-        $match && _pipeline.unshift({ $match });
+        $match && _pipeline.unshift({ $match })
 
         ret = await _collection
             .aggregate(_pipeline)
             .sort({ _id: -1 })
             .toArray()
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
     res.json2(
@@ -91,5 +91,5 @@ export default async function pagination(
             list: ret,
             hasMore: count > pageSize
         }
-    );
+    )
 }

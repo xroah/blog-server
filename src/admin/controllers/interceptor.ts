@@ -2,17 +2,17 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
-import responseError from "../../common/responseError";
+} from "express"
+import responseError from "../../common/responseError"
 
 export default function interceptor(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
-    const session: any = req.session || {};
-    const auth = req.get("authorization") || "";
-    const token = auth.split(" ");
+    const session: any = req.session || {}
+    const auth = req.get("authorization") || ""
+    const token = auth.split(" ")
 
     if (
         (
@@ -25,7 +25,7 @@ export default function interceptor(
             /\/login\/?/.test(req.url)
         )
     ) {
-        return next();
+        return next()
     }
 
     responseError(
@@ -35,5 +35,5 @@ export default function interceptor(
         403,
         "对不起，您没有访问权限！",
         "403.html"
-    );
+    )
 }

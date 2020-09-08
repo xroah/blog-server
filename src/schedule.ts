@@ -1,6 +1,6 @@
-import { CronJob } from "cron";
-import { connectDb } from "./db";
-import { ARTICLES } from "./db/collections";
+import { CronJob } from "cron"
+import { connectDb } from "./db"
+import { ARTICLES } from "./db/collections"
 
 function clearTodayViewed() {
     connectDb(async (db, client) => {
@@ -13,19 +13,19 @@ function clearTodayViewed() {
                             todayViewed: 0
                         }
                     }
-                );
+                )
         } catch (error) {
 
         }
 
-        client.close();
-    });
+        client.close()
+    })
 }
 
 const task = new CronJob("0 0 0 * * *", () => {
-    clearTodayViewed();
+    clearTodayViewed()
 
-    console.log("task executed");
-});
+    console.log("task executed")
+})
 
-task.start();
+task.start()

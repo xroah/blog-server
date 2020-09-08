@@ -2,7 +2,7 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
+} from "express"
 import {
     findOne,
     findOneAndUpdate,
@@ -10,14 +10,14 @@ import {
     redisSet,
     redisClient,
     redisDel
-} from "../../db";
-import { createHash } from "crypto";
-import Code from "../../code";
+} from "../../db"
+import { createHash } from "crypto"
+import Code from "../../code"
 
 function md5(str: string) {
     return createHash("md5")
         .update(str, "utf8")
-        .digest("hex");
+        .digest("hex")
 }
 
 export async function login(
@@ -28,25 +28,25 @@ export async function login(
     let {
         username,
         password
-    } = req.body || {};
-    const MAX_COUNT = 5;
-    const sess = req.session!;
-    const sessId = sess.id;
-    const redisKey = req.ip || sessId;
-    let ret;
-    let remainCount = 0;
+    } = req.body || {}
+    const MAX_COUNT = 5
+    const sess = req.session!
+    const sessId = sess.id
+    const redisKey = req.ip || sessId
+    let ret
+    let remainCount = 0
 
     if (!username || !password) {
-        return res.error(Code.COMMON_ERROR, "请输入用户名和密码！");
+        return res.error(Code.COMMON_ERROR, "请输入用户名和密码！")
     }
 
     try {
-        remainCount = await redisGet(redisKey);
+        remainCount = await redisGet(redisKey)
 
         if (remainCount == undefined) {
-            remainCount = MAX_COUNT;
+            remainCount = MAX_COUNT
         } else if (remainCount <= 0) {
-            return res.error(Code.LOGIN_ERROR, "输入密码次数超过限制！");
+            return res.error(Code.LOGIN_ERROR, "输入密码次数超过限制！")
         }
     } catch (error) {
 
@@ -64,30 +64,30 @@ export async function login(
                     createTime: 0,
                     password: 0
                 }
-            });
+            })
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
     if (!ret) {
         try {
-            await redisSet(redisKey, --remainCount);
+            await redisSet(redisKey, --remainCount)
 
-            redisClient.expire(redisKey, 3600);
+            redisClient.expire(redisKey, 3600)
         } catch (error) {
 
         }
 
-        return res.error(Code.LOGIN_ERROR, `用户名或密码错误， 还有${remainCount}次机会`);
+        return res.error(Code.LOGIN_ERROR, `用户名或密码错误， 还有${remainCount}次机会`)
     }
 
-    const token = sess.token = md5(`${ret.role}${username}${Math.random()}`);
+    const token = sess.token = md5(`${ret.role}${username}${Math.random()}`)
 
-    sess.role = ret.role;
-    sess.username = username;
-    sess.userId = ret._id;
+    sess.role = ret.role
+    sess.username = username
+    sess.userId = ret._id
 
-    redisDel(redisKey).catch(() => { });
+    redisDel(redisKey).catch(() => { })
 
     return res.json2(
         Code.SUCCESS,
@@ -95,7 +95,7 @@ export async function login(
             ...ret,
             token
         }
-    );
+    )
 }
 
 export function logout(
@@ -105,11 +105,11 @@ export function logout(
 ) {
     req.session!.destroy(err => {
         if (err) {
-            return next(err);
+            return next(err)
         }
 
-        res.json2(Code.SUCCESS);
-    });
+        res.json2(Code.SUCCESS)
+    })
 }
 
 export async function updatePassword(
@@ -120,9 +120,9 @@ export async function updatePassword(
     const {
         origPwd,
         newPwd
-    } = req.body;
-    const { username } = req.session!;
-    let ret;
+    } = req.body
+    const { username } = req.session!
+    let ret
 
     try {
         ret = await findOneAndUpdate(
@@ -136,14 +136,14 @@ export async function updatePassword(
                     password: md5(newPwd)
                 }
             }
-        );
+        )
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
     if (ret.value) {
-        return res.json2(Code.SUCCESS);
+        return res.json2(Code.SUCCESS)
     }
 
-    res.error(Code.COMMON_ERROR, "原密码不正确");
+    res.error(Code.COMMON_ERROR, "原密码不正确")
 }

@@ -2,17 +2,17 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
-import { ObjectId } from "mongodb";
+} from "express"
+import { ObjectId } from "mongodb"
 import {
     insertOne,
     findOne,
     find,
-} from "../../db";
-import { COMMENTS, ARTICLES } from "../../db/collections";
+} from "../../db"
+import { COMMENTS, ARTICLES } from "../../db/collections"
 import sanitize from "sanitize-html"
-import limitRequest from "../utils/limitRequest";
-import Code from "../../code";
+import limitRequest from "../utils/limitRequest"
+import Code from "../../code"
 
 async function findArticle(articleId: ObjectId) {
     let article = await findOne(
@@ -25,13 +25,13 @@ async function findArticle(articleId: ObjectId) {
                 authorId: 1
             }
         }
-    );
+    )
 
-    return article;
+    return article
 }
 
 async function findComment(root: ObjectId, replyTo: ObjectId) {
-    let query: any;
+    let query: any
 
     if (root.toHexString() === replyTo.toHexString()) {
         //query the root comment
@@ -45,9 +45,9 @@ async function findComment(root: ObjectId, replyTo: ObjectId) {
         }
     }
 
-    const comment = await findOne(COMMENTS, query);
+    const comment = await findOne(COMMENTS, query)
 
-    return comment;
+    return comment
 }
 
 export async function saveComment(
@@ -55,7 +55,7 @@ export async function saveComment(
     res: Response,
     next: NextFunction
 ) {
-    const MAX = 150;
+    const MAX = 150
     const {
         articleId,
         replyTo = null,
@@ -63,27 +63,27 @@ export async function saveComment(
         content = "",
         homepage = "",
         username
-    } = req.body;
-    let result: any;
+    } = req.body
+    let result: any
 
     if (!articleId) {
-        return res.error(Code.PARAM_ERROR, ("没有articleId"));
+        return res.error(Code.PARAM_ERROR, ("没有articleId"))
     }
 
     if (!content) {
-        return res.error(Code.PARAM_ERROR, "没有评论内容");
+        return res.error(Code.PARAM_ERROR, "没有评论内容")
     }
 
     if (typeof content !== "string") {
-        return res.error(Code.PARAM_ERROR, "内容格式错误");
+        return res.error(Code.PARAM_ERROR, "内容格式错误")
     }
 
     if (content.length > MAX) {
-        return res.error(Code.PARAM_ERROR, `内容超过字数限制，最多${MAX}个字符`);
+        return res.error(Code.PARAM_ERROR, `内容超过字数限制，最多${MAX}个字符`)
     }
 
     if (!username && !req.session!.userId) {
-        return res.error(Code.PARAM_ERROR, "没有用户名");
+        return res.error(Code.PARAM_ERROR, "没有用户名")
     }
 
     limitRequest(
@@ -91,24 +91,24 @@ export async function saveComment(
         res,
         next,
         async () => {
-            const aId = new ObjectId(articleId);
-            const article = await findArticle(aId);
+            const aId = new ObjectId(articleId)
+            const article = await findArticle(aId)
 
             if (!article) {//article may be deleted
                 return res.error(Code.NOT_EXISTS, "文章不存在或已被删除")
             }
 
-            let replyToId;
-            let rootId;
+            let replyToId
+            let rootId
 
             if (root) {
-                rootId = new ObjectId(root);
-                replyToId = new ObjectId(replyTo);
+                rootId = new ObjectId(root)
+                replyToId = new ObjectId(replyTo)
 
-                const c = await findComment(rootId, replyToId);
+                const c = await findComment(rootId, replyToId)
 
                 if (!c) {//the comment may be deleted
-                    return res.error(Code.NOT_EXISTS, "回复的评论不存在或已经被删除");
+                    return res.error(Code.NOT_EXISTS, "回复的评论不存在或已经被删除")
                 }
             }
 
@@ -122,17 +122,17 @@ export async function saveComment(
                 username: username ? sanitize(String(username)) : null,
                 homepage: homepage ? sanitize(String(homepage)) : null,
                 isAuthor: article.authorId === req.session!.userId
-            };
+            }
             const ret = await insertOne(
                 COMMENTS,
                 result
-            );
+            )
 
-            result._id = ret.insertedId;
+            result._id = ret.insertedId
 
-            return result;
+            return result
         }
-    );
+    )
 }
 
 export async function queryCommentsByArticle(
@@ -140,16 +140,16 @@ export async function queryCommentsByArticle(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query;
-    let ret;
+    const { articleId } = req.query
+    let ret
 
     try {
-        const aId = new ObjectId(articleId as any);
+        const aId = new ObjectId(articleId as any)
 
-        ret = await find(COMMENTS, {articleId: aId}).toArray();
+        ret = await find(COMMENTS, {articleId: aId}).toArray()
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
-    res.json2(Code.SUCCESS);
+    res.json2(Code.SUCCESS)
 }

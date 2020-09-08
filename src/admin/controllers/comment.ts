@@ -2,18 +2,18 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
+} from "express"
 import {
     queryCommentsByArticle,
     saveComment
-} from "../../common/controllers/comment";
-import { deleteMany } from "../../db";
-import { COMMENTS, ARTICLES } from "../../db/collections";
-import { ObjectId } from "mongodb";
-import pagination from "../../common/utils/pagination";
-import Code from "../../code";
+} from "../../common/controllers/comment"
+import { deleteMany } from "../../db"
+import { COMMENTS, ARTICLES } from "../../db/collections"
+import { ObjectId } from "mongodb"
+import pagination from "../../common/utils/pagination"
+import Code from "../../code"
 
-export { saveComment };
+export { saveComment }
 
 async function _queryComments(
     req: Request,
@@ -55,7 +55,7 @@ async function _queryComments(
                 articleName: "$articleName.title"
             }
         }]
-    );
+    )
 }
 
 export function queryComments(
@@ -63,13 +63,13 @@ export function queryComments(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query;
+    const { articleId } = req.query
 
     if (articleId) {
-        return queryCommentsByArticle(req, res, next);
+        return queryCommentsByArticle(req, res, next)
     }
 
-    _queryComments(req, res, next);
+    _queryComments(req, res, next)
 }
 
 export async function delComments(
@@ -77,15 +77,15 @@ export async function delComments(
     res: Response,
     next: NextFunction
 ) {
-    const { commentId } = req.body;
-    let ret;
+    const { commentId } = req.body
+    let ret
 
     if (!commentId) {
-        return res.error(Code.PARAM_ERROR, "没有commentId");
+        return res.error(Code.PARAM_ERROR, "没有commentId")
     }
 
     try {
-        const id = new ObjectId(commentId);
+        const id = new ObjectId(commentId)
 
         ret = await deleteMany(
             COMMENTS,
@@ -98,13 +98,13 @@ export async function delComments(
                     root: id
                 }]
             }
-        );
+        )
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
     if (ret.deletedCount) {
-        return res.json2(Code.SUCCESS);
+        return res.json2(Code.SUCCESS)
     }
 
     res.error(Code.NOT_EXISTS, "评论不存在或已被删除")

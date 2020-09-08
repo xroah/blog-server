@@ -3,7 +3,7 @@ import {
     Response,
     NextFunction
 } from "express"
-import { join } from "path";
+import { join } from "path"
 
 export default function responseError(
     req: Request,
@@ -14,7 +14,7 @@ export default function responseError(
     file: string
 ) {
     if (req.xhr) {
-        return res.error(code, msg, code);
+        return res.error(code, msg, code)
     }
 
     res.sendFile(
@@ -25,5 +25,5 @@ export default function responseError(
             }
         },
         err => err && next(err)
-    );
+    )
 }

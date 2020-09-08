@@ -2,8 +2,8 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
-import responseError from "../responseError";
+} from "express"
+import responseError from "../responseError"
 
 export default function handleError(
     err: any,
@@ -11,7 +11,7 @@ export default function handleError(
     res: Response,
     next: NextFunction
 ) {
-    console.log(err);
+    console.log(err)
 
     responseError(
         req,
@@ -20,5 +20,5 @@ export default function handleError(
         500,
         err.message || "服务器错误！",
         "500.html"
-    );
+    )
 }

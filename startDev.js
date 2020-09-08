@@ -1,6 +1,6 @@
-const childProc = require("child_process");
+const childProc = require("child_process")
 
-process.env.NODE_ENV = "development";
+process.env.NODE_ENV = "development"
 
 childProc.spawn(
     "nodemon",
@@ -15,4 +15,4 @@ childProc.spawn(
         stdio: "inherit",
         shell: true
     }
-);
+)

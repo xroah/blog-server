@@ -1,14 +1,14 @@
 .error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: flex
+    flex-direction: column
+    align-items: center
 }
 
 .error span:first-child {
-    font-size: 300px;
-    color: #ec191b;
+    font-size: 300px
+    color: #ec191b
 }
 
 .error span:last-child {
-    font-size: 24px;
+    font-size: 24px
 }

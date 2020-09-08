@@ -2,12 +2,12 @@ import {
     Request,
     Response,
     NextFunction
-} from "express";
-import { findOneAndDelete } from "../../db";
-import { FEEDBACKS } from "../../db/collections";
-import { ObjectId } from "mongodb";
-import Code from "../../code";
-import pagination from "../../common/utils/pagination";
+} from "express"
+import { findOneAndDelete } from "../../db"
+import { FEEDBACKS } from "../../db/collections"
+import { ObjectId } from "mongodb"
+import Code from "../../code"
+import pagination from "../../common/utils/pagination"
 
 export function queryFeedbacks(
     req: Request,
@@ -20,7 +20,7 @@ export function queryFeedbacks(
         next,
         FEEDBACKS,
         []
-    );
+    )
 }
 
 export async function delFeedback(
@@ -28,8 +28,8 @@ export async function delFeedback(
     res: Response,
     next: NextFunction
 ) {
-    const { feedbackId } = req.body;
-    let ret;
+    const { feedbackId } = req.body
+    let ret
 
     try {
         ret = await findOneAndDelete(
@@ -37,14 +37,14 @@ export async function delFeedback(
             {
                 _id: new ObjectId(feedbackId)
             }
-        );
+        )
     } catch (error) {
-        return next(error);
+        return next(error)
     }
 
     if (ret.value) {
-        return res.json2(Code.SUCCESS);
+        return res.json2(Code.SUCCESS)
     }
 
-    res.error(Code.NOT_EXISTS, "该数据不存在或已被删除");
+    res.error(Code.NOT_EXISTS, "该数据不存在或已被删除")
 }

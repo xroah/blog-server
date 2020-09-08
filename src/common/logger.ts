@@ -1,6 +1,6 @@
-import log4js, { Logger } from "log4js";
+import log4js, { Logger } from "log4js"
 
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === "development"
 
 log4js.configure({
     appenders: {
@@ -29,14 +29,14 @@ log4js.configure({
             level: "debug"
         }
     }
-});
+})
 
-let logger: Logger;
+let logger: Logger
 
 if (isDev) {
-    logger = log4js.getLogger();
+    logger = log4js.getLogger()
 } else {
-    logger = log4js.getLogger("file");
+    logger = log4js.getLogger("file")
 }
 
-export default logger;
+export default logger
