@@ -2,9 +2,9 @@ import { PORT } from "./config"
 import express from "express"
 import createApp from "./app"
 import { connectDb } from "./db"
-import {fork} from "child_process"
+import { fork } from "child_process"
 import { join } from "path"
-import logger from "./common/logger"
+import logger, { DIVIDER } from "./common/logger"
 
 declare global {
   namespace Express {
@@ -15,35 +15,39 @@ declare global {
   }
 }
 
-express.response.error = function(code: number, msg: string, status = 200, data) {
-    const obj = {
-        code,
-        msg,
-        data
-    }
+express.response.error = function (code: number, msg: string, status = 200, data) {
+  const obj = {
+    code,
+    msg,
+    data
+  }
 
-    logger.debug("error status:", status)
-    logger.debug("response error:", JSON.stringify(obj))
+  logger.error("error status", status)
+  logger.error("error message", JSON.stringify(obj))
+  logger.info("", DIVIDER)
 
-    this.status(status)
-    this.json(obj)
+  this.status(status)
+  this.json(obj)
 
-    return this
+  return this
 }
 
 express.response.json2 = function json2(code: number, data?: any) {
-    const obj = {
-        code,
-        data
-    }
+  const obj = {
+    code,
+    data
+  }
 
-    this.json(obj)
-    logger.debug("response json:", JSON.stringify(obj))
-    return this
+  logger.debug("response json", JSON.stringify(obj))
+  logger.info("", DIVIDER)
+
+  this.json(obj)
+
+  return this
 }
 
 connectDb(() => {
-    createApp().listen(PORT)
+  createApp().listen(PORT)
 })
 
 fork(join(__dirname, "./schedule.ts"))

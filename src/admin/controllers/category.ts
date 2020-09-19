@@ -28,7 +28,6 @@ export async function saveCategory(
         cover
     } = req.body
     const isEdit = !!categoryId
-    let ret
 
     try {
         const _id = new ObjectID(categoryId)
@@ -49,7 +48,7 @@ export async function saveCategory(
             }
         }
 
-        ret = await findOneAndUpdate(
+        await findOneAndUpdate(
             CATEGORIES,
             { _id },
             { $set: data },

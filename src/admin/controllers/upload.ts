@@ -19,7 +19,7 @@ const mimeType = new Map([
 ])
 
 const storage = multer.diskStorage({
-    destination(req, file, cb) {
+    destination(_, __, cb) {
         const date = new Date()
         const year = date.getFullYear()
         const mon = String(100 + date.getMonth() + 1).substring(1)
@@ -32,7 +32,7 @@ const storage = multer.diskStorage({
 
         cb(null, dest)
     },
-    filename(req, file, cb) {
+    filename(_, file, cb) {
         const ext = mimeType.get(file.mimetype) as string
         const id = new ObjectID()
         const name = id + ext

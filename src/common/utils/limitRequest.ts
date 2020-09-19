@@ -47,7 +47,7 @@ export default async function limitRequest(
             const saved = await redisGet(sessId)
             //user can post one time within 1 minute
             if (saved) {
-                return res.error(Code.FEQUENCy_ERROR, BUSY_MSG)
+                return res.error(Code.FEQUENCY_ERROR, BUSY_MSG)
             }
 
             ret = await operate()
