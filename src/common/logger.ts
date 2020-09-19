@@ -2,16 +2,8 @@ import log4js, { Logger } from "log4js"
 
 const isDev = process.env.NODE_ENV === "development"
 
-log4js.configure({
+const cfg: any = {
     appenders: {
-        file: {
-            type: "dateFile",
-            filename: "/var/log/blog-log",
-            compress: true,
-            daysToKeep: 30,
-            pattern: "yyyy-MM-dd.log",
-            alwaysIncludePattern: true
-        },
         console: {
             type: "stdout",
             layout: {
@@ -20,22 +12,35 @@ log4js.configure({
         }
     },
     categories: {
-        file: {
-            appenders: ["file"],
-            level: "debug"
-        },
         default: {
             appenders: ["console"],
             level: "debug"
         }
     }
-})
+}
 
 let logger: Logger
 
 if (isDev) {
+    log4js.configure(cfg);
+
     logger = log4js.getLogger()
 } else {
+    cfg.appenders.file = {
+        type: "dateFile",
+        filename: "/var/log/blog-log",
+        compress: true,
+        daysToKeep: 30,
+        pattern: "yyyy-MM-dd.log",
+        alwaysIncludePattern: true
+    }
+    cfg.categories.file = {
+        appenders: ["file"],
+        level: "debug"
+    }
+
+    log4js.configure(cfg)
+
     logger = log4js.getLogger("file")
 }
 

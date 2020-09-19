@@ -26,8 +26,6 @@ const storage = multer.diskStorage({
         const dir = `/uploads/${year}/${mon}`
         const dest = `${process.env.HOME || "/"}${dir}`
 
-        (file as any).dir = dir
-
         if (!existsSync(dest)) {
             mkdirSync(dest, { recursive: true })
         }
@@ -60,9 +58,8 @@ export default function upload(
 
         const {
             filename,
-            dir
-        } = req.file as any
-
-        res.json2(Code.SUCCESS, { url: `${dir}/${filename}` })
+            destination
+        } = req.file
+        res.json2(Code.SUCCESS, { url: `${destination}/${filename}` })
     })
 }
