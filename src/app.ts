@@ -45,8 +45,8 @@ export default function createApp() {
         next()
     })
 
-    app.use("/api", user)
-    app.use("/api/admin", admin)
+    app.use("/graphql", user)
+    app.use("/graphql/admin", admin)
     app.use(nonMatch)
     app.use(handleError)
 
