@@ -10,13 +10,9 @@ import {
     NextFunction
 } from "express"
 import Code from "../../code"
+import mime from "mime-types"
 
 const FIELD_NAME = "articleImage"
-
-const mimeType = new Map([
-    ["image/png", ".png"],
-    ["image/jpeg", ".jpg"]
-])
 
 const storage = multer.diskStorage({
     destination(_, __, cb) {
@@ -33,9 +29,8 @@ const storage = multer.diskStorage({
         cb(null, dest)
     },
     filename(_, file, cb) {
-        const ext = mimeType.get(file.mimetype) as string
         const id = new ObjectID()
-        const name = id + ext
+        const name = `${id}.${mime.extension(file.mimetype)}`
 
         cb(null, name)
     }
