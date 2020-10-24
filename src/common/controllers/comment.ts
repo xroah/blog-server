@@ -151,5 +151,5 @@ export async function queryCommentsByArticle(
         return next(error)
     }
 
-    res.json2(Code.SUCCESS)
+    res.json2(Code.SUCCESS, ret)
 }
