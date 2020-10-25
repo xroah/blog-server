@@ -12,7 +12,7 @@ import {
 import signature from "cookie-signature"
 import noop from "../../common/utils/noop"
 import isAdmin from "./isAdmin"
-import { SESSION_KEY } from "../../config"
+import {SESSION_KEY} from "../../config"
 import Code from "../../code"
 
 export default async function limitRequest(
@@ -28,10 +28,6 @@ export default async function limitRequest(
     if (isAdmin(req)) {
         try {
             ret = await operate()
-
-            if (ret instanceof Error) {
-                return next(ret)
-            }
         } catch (error) {
             return next(error)
         }
@@ -47,14 +43,10 @@ export default async function limitRequest(
             const saved = await redisGet(sessId)
             //user can post one time within 1 minute
             if (saved) {
-                return res.error(Code.FEQUENCY_ERROR, BUSY_MSG)
+                return res.error(Code.FREQUENCY_ERROR, BUSY_MSG)
             }
 
             ret = await operate()
-
-            if (ret instanceof Error) {
-                return next(ret)
-            }
 
             await redisSet(sessId, "saved")
             redisClient.expire(sessId, 60, noop)

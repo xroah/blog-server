@@ -6,8 +6,8 @@ enum Code {
     LOGIN_ERROR = 1000,
     COMMON_ERROR = 1001,
     PARAM_ERROR = 1002,
-    FEQUENCY_ERROR = 1003,
-    UNKNOWN_ERROR = 1024
+    FREQUENCY_ERROR = 1003,
+    UNKNOWN_ERROR = 1004
 }
 
 export default Code

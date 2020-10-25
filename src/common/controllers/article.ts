@@ -4,8 +4,8 @@ import {
     NextFunction
 } from "express"
 import nonMatch from "./nonMatch"
-import { ObjectID } from "mongodb"
-import { db, find } from "../../db"
+import {ObjectID} from "mongodb"
+import {db, find} from "../../db"
 import {
     ARTICLES,
     CATEGORIES,
@@ -19,7 +19,7 @@ async function queryById(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query
+    const {articleId} = req.query
 
     const admin = isAdmin(req)
     let ret
@@ -53,13 +53,6 @@ async function queryById(
                 },
                 {
                     $set: {
-                        categoryName: {
-                            $arrayElemAt: ["$categoryName", 0]
-                        }
-                    }
-                },
-                {
-                    $set: {
                         categoryName: "$categoryName.name"
                     }
                 },
@@ -69,7 +62,8 @@ async function queryById(
                         modifyTime: 0
                     }
                 }
-            ]).toArray()
+            ])
+            .toArray()
         ret = ret[0]
     } catch (error) {
         return next(error)
@@ -79,10 +73,7 @@ async function queryById(
         return nonMatch(req, res, next)
     }
 
-    res.json({
-        code: 0,
-        data: ret
-    })
+    res.json2(Code.SUCCESS, ret, false)
 }
 
 async function queryByCondition(
@@ -130,13 +121,13 @@ async function queryByCondition(
         options.projection.draft = 0
     } else {
         if (secret === "true") {
-            filter.push({ secret: true })
+            filter.push({secret: true})
         } else if (secret === "false") {
             filter.push(nonSecret)
         }
 
         if (draft === "true") {
-            filter.push({ draft: true })
+            filter.push({draft: true})
         } else if (draft === "false") {
             filter.push(nonDraft)
         }
@@ -168,7 +159,7 @@ async function queryByCondition(
             }, {
                 $lookup: {
                     from: COMMENTS,
-                    let: { aId: "$_id" },
+                    let: {aId: "$_id"},
                     pipeline: [{
                         $match: {
                             $expr: {
@@ -178,21 +169,11 @@ async function queryByCondition(
                     }, {
                         $count: "count",
                     }],
-                    as: "comments"
+                    as: "commentCount"
                 }
             }, {
                 $set: {
-                    comments: {
-                        $arrayElemAt: ["$comments", 0]
-                    }
-                }
-            }, {
-                $set: {
-                    commentCount: "$comments.count"
-                }
-            }, {
-                $project: {
-                    comments: 0
+                    commentCount: "$commentCount.count"
                 }
             }]).toArray()
     } catch (error) {
@@ -204,7 +185,8 @@ async function queryByCondition(
         {
             total: count,
             list: ret
-        }
+        },
+        false
     )
 }
 
@@ -225,15 +207,15 @@ export async function queryPrevAndAfter(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query
+    const {articleId} = req.query
     const admin = isAdmin(req)
     const ret: any = {}
     let filter: any = {}
     const _find = (filter: any, sort: number) => {
         return find(ARTICLES, filter)
-            .sort({ _id: sort })
+            .sort({_id: sort})
             .limit(1)
-            .project({ _id: 1 })
+            .project({_id: 1})
             .toArray()
     }
 

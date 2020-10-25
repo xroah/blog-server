@@ -3,8 +3,8 @@ import {
     Response,
     NextFunction
 } from "express"
-import { find, db } from "../../db"
-import { CATEGORIES, ARTICLES } from "../../db/collections"
+import {find, db} from "../../db"
+import {CATEGORIES, ARTICLES} from "../../db/collections"
 import Code from "../../code"
 
 export async function queryCategory(
@@ -13,7 +13,7 @@ export async function queryCategory(
     next: NextFunction
 ) {
     let ret
-    let { queryArticle } = req.query
+    let {queryArticle} = req.query
 
     try {
         let cursor
@@ -26,7 +26,7 @@ export async function queryCategory(
                     {
                         $lookup: {
                             from: ARTICLES,
-                            let: { cId: "$_id" },
+                            let: {cId: "$_id"},
                             pipeline: [{
                                 $match: {
                                     $expr: {
@@ -36,30 +36,18 @@ export async function queryCategory(
                             }, {
                                 $count: "count"
                             }],
-                            as: "articles"
+                            as: "articleCount"
                         }
                     },
                     {
                         $set: {
-                            articles: {
-                                $arrayElemAt: ["$articles", 0]
-                            }
-                        }
-                    },
-                    {
-                        $set: {
-                            articleCount: "$articles.count"
-                        }
-                    },
-                    {
-                        $project: {
-                            articles: 0
+                            articleCount: "$articleCount.count"
                         }
                     }
                 ])
         }
 
-        ret = await cursor.sort({ _id: -1 }).toArray()
+        ret = await cursor.sort({_id: -1}).toArray()
     } catch (error) {
         return next(error)
     }

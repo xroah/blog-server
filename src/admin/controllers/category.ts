@@ -3,18 +3,18 @@ import {
     Response,
     NextFunction
 } from "express"
-import { ObjectID } from "mongodb"
+import {ObjectID} from "mongodb"
 import {
     findOneAndUpdate,
     findOneAndDelete,
     findOne
 } from "../../db"
-import { CATEGORIES, ARTICLES } from "../../db/collections"
+import {CATEGORIES, ARTICLES} from "../../db/collections"
 import fs from "fs"
 import promisify from "../../common/utils/promisify"
 import Code from "../../code"
 
-export { queryCategory } from "../../common/controllers/category"
+export {queryCategory} from "../../common/controllers/category"
 
 export async function saveCategory(
     req: Request,
@@ -40,7 +40,7 @@ export async function saveCategory(
         }
 
         if (!isEdit) {
-            const exist = await findOne(CATEGORIES, { name: categoryName })
+            const exist = await findOne(CATEGORIES, {name: categoryName})
             data.createTime = new Date()
 
             if (exist) {
@@ -50,9 +50,9 @@ export async function saveCategory(
 
         await findOneAndUpdate(
             CATEGORIES,
-            { _id },
-            { $set: data },
-            { upsert: true }
+            {_id},
+            {$set: data},
+            {upsert: true}
         )
     } catch (error) {
         return next(error)
@@ -81,13 +81,13 @@ export async function delCategory(
 
     try {
         const _id = new ObjectID(categoryId)
-        const article = await findOne(ARTICLES, { categoryId: _id })
+        const article = await findOne(ARTICLES, {categoryId: _id})
 
         if (article) {
             return res.error(Code.SUCCESS, "有文章属于该分类，不能删除")
         }
 
-        ret = await findOneAndDelete(CATEGORIES, { _id })
+        ret = await findOneAndDelete(CATEGORIES, {_id})
     } catch (error) {
         return next(error)
     }

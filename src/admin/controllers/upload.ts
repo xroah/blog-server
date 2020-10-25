@@ -55,6 +55,7 @@ export default function upload(
             filename,
             destination
         } = req.file
+        
         res.json2(Code.SUCCESS, { url: `${destination}/${filename}` })
     })
 }

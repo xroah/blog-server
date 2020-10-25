@@ -7,13 +7,13 @@ import {
     queryCommentsByArticle,
     saveComment
 } from "../../common/controllers/comment"
-import { deleteMany } from "../../db"
-import { COMMENTS, ARTICLES } from "../../db/collections"
-import { ObjectId } from "mongodb"
+import {deleteMany} from "../../db"
+import {COMMENTS, ARTICLES} from "../../db/collections"
+import {ObjectId} from "mongodb"
 import pagination from "../../common/utils/pagination"
 import Code from "../../code"
 
-export { saveComment }
+export {saveComment}
 
 async function _queryComments(
     req: Request,
@@ -28,7 +28,7 @@ async function _queryComments(
         [{
             $lookup: {
                 from: ARTICLES,
-                let: { aId: "$articleId" },
+                let: {aId: "$articleId"},
                 pipeline: [{
                     $match: {
                         $expr: {
@@ -45,13 +45,6 @@ async function _queryComments(
         },
         {
             $set: {
-                articleName: {
-                    $arrayElemAt: ["$articleName", 0]
-                }
-            }
-        },
-        {
-            $set: {
                 articleName: "$articleName.title"
             }
         }]
@@ -63,7 +56,7 @@ export function queryComments(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query
+    const {articleId} = req.query
 
     if (articleId) {
         return queryCommentsByArticle(req, res, next)
@@ -77,7 +70,7 @@ export async function delComments(
     res: Response,
     next: NextFunction
 ) {
-    const { commentId } = req.body
+    const {commentId} = req.body
     let ret
 
     if (!commentId) {

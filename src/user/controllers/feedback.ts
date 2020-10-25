@@ -3,8 +3,8 @@ import {
     Response,
     NextFunction
 } from "express"
-import { insertOne } from "../../db"
-import { FEEDBACKS } from "../../db/collections"
+import {insertOne} from "../../db"
+import {FEEDBACKS} from "../../db/collections"
 import sanitize from "sanitize-html"
 import limitRequest from "../../common/utils/limitRequest"
 import Code from "../../code"

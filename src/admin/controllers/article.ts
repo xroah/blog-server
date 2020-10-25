@@ -10,13 +10,13 @@ import {
     findOneAndDelete,
     deleteMany
 } from "../../db"
-import { ARTICLES, IMAGES, COMMENTS } from "../../db/collections"
-import { ObjectID } from "mongodb"
-import { unlink } from "fs"
+import {ARTICLES, IMAGES, COMMENTS} from "../../db/collections"
+import {ObjectID} from "mongodb"
+import {unlink} from "fs"
 import promisify from "../../common/utils/promisify"
 import Code from "../../code"
 
-export { queryArticle } from "../../common/controllers/article"
+export {queryArticle} from "../../common/controllers/article"
 
 //link to article, for deleting the image if the article does not exist
 function updateImage(images: Array<any>, articleId: ObjectID) {
@@ -33,7 +33,7 @@ function updateImage(images: Array<any>, articleId: ObjectID) {
                 type: "article image"
             }
         },
-        { upsert: true }
+        {upsert: true}
     )
 }
 
@@ -93,22 +93,22 @@ export async function saveArticle(
 
         await findOneAndUpdate(
             ARTICLES,
-            { _id },
-            { $set: update },
-            { upsert: true }
+            {_id},
+            {$set: update},
+            {upsert: true}
         )
     } catch (error) {
         return next(error)
     }
 
-    res.json2(Code.SUCCESS, { _id })
+    res.json2(Code.SUCCESS, {_id})
 }
 
 async function deleteImages(articleId: ObjectID) {
     let ret
 
     try {
-        ret = await find(IMAGES, { relatedId: articleId }).toArray()
+        ret = await find(IMAGES, {relatedId: articleId}).toArray()
 
         if (ret.length) {
             for (let img of ret) {
@@ -116,7 +116,7 @@ async function deleteImages(articleId: ObjectID) {
             }
         }
 
-        deleteMany(IMAGES, { articleId })
+        deleteMany(IMAGES, {articleId})
     } catch (error) {
 
     }
@@ -140,7 +140,7 @@ export async function deleteArticle(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.body
+    const {articleId} = req.body
     let ret
 
     try {
@@ -149,7 +149,7 @@ export async function deleteArticle(
         }
 
         const _id = new ObjectID(articleId)
-        ret = await findOneAndDelete(ARTICLES, { _id })
+        ret = await findOneAndDelete(ARTICLES, {_id})
 
         deleteImages(_id)
         deleteComments(_id)

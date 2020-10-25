@@ -1,6 +1,6 @@
 import express from "express"
 import interceptor from "./controllers/interceptor"
-import { login, logout, updatePassword } from "./controllers/login"
+import {login, logout, updatePassword} from "./controllers/login"
 import upload from "./controllers/upload"
 import {
     saveArticle,
@@ -17,32 +17,37 @@ import {
     delComments,
     saveComment
 } from "./controllers/comment"
-import { queryFeedbacks, delFeedback } from "./controllers/feedback"
+import {queryFeedbacks, delFeedback} from "./controllers/feedback"
 
 const app = express()
 
-app.all("*", interceptor)
+app
+    .all("*", interceptor)
     .post("/login", login)
     .post("/logout", logout)
     .post("/password", updatePassword)
     .post("/upload", upload)
 
-app.route("/article")
+app
+    .route("/article")
     .post(saveArticle)
     .get(queryArticle)
     .delete(deleteArticle)
 
-app.route("/category")
+app
+    .route("/category")
     .post(saveCategory)
     .delete(delCategory)
     .get(queryCategory)
 
-app.route("/comment")
+app
+    .route("/comment")
     .get(queryComments)
     .delete(delComments)
     .post(saveComment)
 
-app.route("/feedback")
+app
+    .route("/feedback")
     .get(queryFeedbacks)
     .delete(delFeedback)
 

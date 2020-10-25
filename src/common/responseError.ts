@@ -3,12 +3,12 @@ import {
     Response,
     NextFunction
 } from "express"
-import { join } from "path"
+import {join} from "path"
 
 export default function responseError(
     req: Request,
     res: Response,
-    next: NextFunction, 
+    next: NextFunction,
     code: number,
     msg: string,
     file: string

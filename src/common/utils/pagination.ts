@@ -3,10 +3,11 @@ import {
     Response,
     NextFunction
 } from "express"
-import { ObjectId } from "mongodb"
-import { db } from "../../db"
+import {ObjectId} from "mongodb"
+import {db} from "../../db"
 import Code from "../../code"
 
+//pagination by after or before
 export default async function pagination(
     req: Request,
     res: Response,
@@ -26,7 +27,9 @@ export default async function pagination(
     let ret
     pageSize = Number(pageSize) || PAGE_SIZE
 
-    if (pageSize < 0) pageSize = PAGE_SIZE
+    if (pageSize < 0) {
+        pageSize = PAGE_SIZE
+    }
 
     try {
         let $match: any = [...matches]
@@ -61,7 +64,7 @@ export default async function pagination(
         } else {
             $match = $match[0]
         }
-        
+
         count = await _collection.countDocuments($match || {}, {})
         let _pipeline = [
             {
@@ -75,11 +78,11 @@ export default async function pagination(
             ...pipeline
         ]
 
-        $match && _pipeline.unshift({ $match })
+        $match && _pipeline.unshift({$match})
 
         ret = await _collection
             .aggregate(_pipeline)
-            .sort({ _id: -1 })
+            .sort({_id: -1})
             .toArray()
     } catch (error) {
         return next(error)

@@ -1,4 +1,4 @@
-import log4js, { Logger } from "log4js"
+import log4js, {Logger} from "log4js"
 
 const isDev = process.env.NODE_ENV === "development"
 export const DIVIDER = "================================"

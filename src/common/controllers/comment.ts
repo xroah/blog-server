@@ -3,13 +3,13 @@ import {
     Response,
     NextFunction
 } from "express"
-import { ObjectId } from "mongodb"
+import {ObjectId} from "mongodb"
 import {
     insertOne,
     findOne,
     find,
 } from "../../db"
-import { COMMENTS, ARTICLES } from "../../db/collections"
+import {COMMENTS, ARTICLES} from "../../db/collections"
 import sanitize from "sanitize-html"
 import limitRequest from "../utils/limitRequest"
 import Code from "../../code"
@@ -140,7 +140,7 @@ export async function queryCommentsByArticle(
     res: Response,
     next: NextFunction
 ) {
-    const { articleId } = req.query
+    const {articleId} = req.query
     let ret
 
     try {

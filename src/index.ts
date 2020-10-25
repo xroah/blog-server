@@ -1,15 +1,15 @@
-import { PORT } from "./config"
+import {PORT} from "./config"
 import express from "express"
 import createApp from "./app"
-import { connectDb } from "./db"
-import { fork } from "child_process"
-import { join } from "path"
-import logger, { DIVIDER } from "./common/logger"
+import {connectDb} from "./db"
+import {fork} from "child_process"
+import {join} from "path"
+import logger, {DIVIDER} from "./common/logger"
 
 declare global {
   namespace Express {
     interface Response {
-      json2: (code: number, data?: any) => this
+      json2: (code: number, data?: any, logData?: boolean) => this
       error: (code: number, msg: string, status?: number, data?: any) => this
     }
   }
@@ -32,13 +32,19 @@ express.response.error = function (code: number, msg: string, status = 200, data
   return this
 }
 
-express.response.json2 = function json2(code: number, data?: any) {
+express.response.json2 = function json2(
+  code: number,
+  data?: any,
+  logData = true
+) {
   const obj = {
     code,
     data
   }
 
-  logger.debug("response json", JSON.stringify(obj))
+  logger.debug("response json", JSON.stringify(
+    logData ? obj : {code}
+  ))
   logger.info("", DIVIDER)
 
   this.json(obj)

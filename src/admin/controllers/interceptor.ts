@@ -12,7 +12,7 @@ export default function interceptor(
 ) {
     const session: any = req.session || {}
     const auth = req.get("authorization") || ""
-    const token = auth.split(" ")
+    const token = auth.split(/\s+/)
 
     if (
         (
