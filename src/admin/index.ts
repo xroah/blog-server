@@ -1,6 +1,10 @@
 import express from "express"
 import interceptor from "./controllers/interceptor"
-import {login, logout, updatePassword} from "./controllers/login"
+import {
+    login,
+    logout,
+    updatePassword
+} from "./controllers/login"
 import upload from "./controllers/upload"
 import {
     saveArticle,

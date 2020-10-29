@@ -9,7 +9,10 @@ import {
     findOne,
     find,
 } from "../../db"
-import {COMMENTS, ARTICLES} from "../../db/collections"
+import {
+    COMMENTS,
+    ARTICLES
+} from "../../db/collections"
 import sanitize from "sanitize-html"
 import limitRequest from "../utils/limitRequest"
 import Code from "../../code"

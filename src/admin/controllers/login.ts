@@ -11,8 +11,9 @@ import {
     redisClient,
     redisDel
 } from "../../db"
-import { createHash } from "crypto"
+import {createHash} from "crypto"
 import Code from "../../code"
+import noop from "../../common/utils/noop"
 
 function md5(str: string) {
     return createHash("md5")
@@ -49,7 +50,6 @@ export async function login(
             return res.error(Code.LOGIN_ERROR, "输入密码次数超过限制！")
         }
     } catch (error) {
-
     }
 
     try {
@@ -87,7 +87,7 @@ export async function login(
     sess.username = username
     sess.userId = ret._id
 
-    redisDel(redisKey).catch(() => { })
+    redisDel(redisKey).catch(noop)
 
     return res.json2(
         Code.SUCCESS,
@@ -121,7 +121,7 @@ export async function updatePassword(
         origPwd,
         newPwd
     } = req.body
-    const { username } = req.session!
+    const {username} = req.session!
     let ret
 
     try {

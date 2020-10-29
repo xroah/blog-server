@@ -9,7 +9,10 @@ import {
     findOneAndDelete,
     findOne
 } from "../../db"
-import {CATEGORIES, ARTICLES} from "../../db/collections"
+import {
+    CATEGORIES,
+    ARTICLES
+} from "../../db/collections"
 import fs from "fs"
 import promisify from "../../common/utils/promisify"
 import Code from "../../code"

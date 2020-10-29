@@ -10,7 +10,11 @@ import {
     findOneAndDelete,
     deleteMany
 } from "../../db"
-import {ARTICLES, IMAGES, COMMENTS} from "../../db/collections"
+import {
+    ARTICLES,
+    IMAGES,
+    COMMENTS
+} from "../../db/collections"
 import {ObjectID} from "mongodb"
 import {unlink} from "fs"
 import promisify from "../../common/utils/promisify"

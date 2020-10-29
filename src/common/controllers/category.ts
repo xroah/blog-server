@@ -4,7 +4,10 @@ import {
     NextFunction
 } from "express"
 import {find, db} from "../../db"
-import {CATEGORIES, ARTICLES} from "../../db/collections"
+import {
+    CATEGORIES,
+    ARTICLES
+} from "../../db/collections"
 import Code from "../../code"
 
 export async function queryCategory(

@@ -175,7 +175,8 @@ async function queryByCondition(
                 $set: {
                     commentCount: "$commentCount.count"
                 }
-            }]).toArray()
+            }])
+            .toArray()
     } catch (error) {
         return next(error)
     }

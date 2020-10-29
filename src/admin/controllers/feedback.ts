@@ -3,9 +3,9 @@ import {
     Response,
     NextFunction
 } from "express"
-import { findOneAndDelete } from "../../db"
-import { FEEDBACKS } from "../../db/collections"
-import { ObjectId } from "mongodb"
+import {findOneAndDelete} from "../../db"
+import {FEEDBACKS} from "../../db/collections"
+import {ObjectId} from "mongodb"
 import Code from "../../code"
 import pagination from "../../common/utils/pagination"
 
@@ -28,7 +28,7 @@ export async function delFeedback(
     res: Response,
     next: NextFunction
 ) {
-    const { feedbackId } = req.body
+    const {feedbackId} = req.body
     let ret
 
     try {

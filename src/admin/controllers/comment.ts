@@ -8,7 +8,10 @@ import {
     saveComment
 } from "../../common/controllers/comment"
 import {deleteMany} from "../../db"
-import {COMMENTS, ARTICLES} from "../../db/collections"
+import {
+    COMMENTS,
+    ARTICLES
+} from "../../db/collections"
 import {ObjectId} from "mongodb"
 import pagination from "../../common/utils/pagination"
 import Code from "../../code"

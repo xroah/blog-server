@@ -2,13 +2,13 @@ import express from "express"
 import session from "express-session"
 import store from "connect-redis"
 import cookieParser from "cookie-parser"
-import { join } from "path"
+import {join} from "path"
 import user from "./user"
 import admin from "./admin"
 import nonMatch from "./common/controllers/nonMatch"
 import handleError from "./common/controllers/handleError"
-import { redisClient } from "./db"
-import { SESSION_KEY } from "./config"
+import {redisClient} from "./db"
+import {SESSION_KEY} from "./config"
 import logger, {DIVIDER} from "./common/logger"
 
 export default function createApp() {
@@ -23,7 +23,7 @@ export default function createApp() {
     app.use(cookieParser())
     app.use(
         session({
-            store: new RedisStore({ client: redisClient }),
+            store: new RedisStore({client: redisClient}),
             secret: SESSION_KEY,
             rolling: true,
             resave: true,
