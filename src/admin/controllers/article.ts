@@ -120,7 +120,7 @@ async function deleteImages(articleId: ObjectID) {
             }
         }
 
-        deleteMany(IMAGES, {articleId})
+        await deleteMany(IMAGES, {articleId})
     } catch (error) {
 
     }
@@ -155,8 +155,8 @@ export async function deleteArticle(
         const _id = new ObjectID(articleId)
         ret = await findOneAndDelete(ARTICLES, {_id})
 
-        deleteImages(_id)
-        deleteComments(_id)
+        await deleteImages(_id)
+        await deleteComments(_id)
     } catch (error) {
         return next(error)
     }
